@@ -372,6 +372,67 @@ def sanitise_mermaid(mmd_str):
     mmd_str = re.sub(r'(\[)([^\]]+)(\])', clean_label, mmd_str)
     mmd_str = re.sub(r'(\{)([^}]+)(\})', clean_label, mmd_str)
     mmd_str = re.sub(r'(\()([^)]+)(\))', clean_label, mmd_str)
+    # 5a. Move a trailing classDef / class / style statement onto its own line.
+    #     mermaid requires these as standalone statements; anything after a node
+    #     on the same line is a hard parse error:
+    #       Parse error ... got 'CLASSDEF'
+    #     Told to "always include this classDef line", the model appends it right
+    #     after the node it means to style. When that happens the intent is
+    #     recoverable: keep the node, hoist the classDef to the end, and add the
+    #     `class <node> <name>` assignment the model omitted — otherwise the
+    #     definition would survive but nothing would be styled by it.
+    hoisted_defs, hoisted_assign = [], []
+    out_lines = []
+    for line in mmd_str.split('\n'):
+        depth_sq = depth_cu = depth_pa = 0
+        in_q = False
+        cut = None
+        i = 0
+        while i < len(line):
+            ch = line[i]
+            if ch == '"':
+                in_q = not in_q
+            elif not in_q:
+                if ch == '[':
+                    depth_sq += 1
+                elif ch == ']':
+                    depth_sq = max(0, depth_sq - 1)
+                elif ch == '{':
+                    depth_cu += 1
+                elif ch == '}':
+                    depth_cu = max(0, depth_cu - 1)
+                elif ch == '(':
+                    depth_pa += 1
+                elif ch == ')':
+                    depth_pa = max(0, depth_pa - 1)
+                elif depth_sq == depth_cu == depth_pa == 0:
+                    m = re.match(r'\s+(classDef|class|style)\s+', line[i:])
+                    if m and line[:i].strip():
+                        cut = i
+                        break
+            i += 1
+        if cut is None:
+            out_lines.append(line)
+            continue
+        head, tail = line[:cut].rstrip(), line[cut:].strip()
+        out_lines.append(head)
+        kw = tail.split(None, 1)[0]
+        if kw == 'classDef':
+            hoisted_defs.append(tail)
+            cls = tail.split(None, 2)[1] if len(tail.split(None, 2)) > 1 else None
+            node = re.match(r'\s*([A-Za-z][A-Za-z0-9_]*)', head)
+            if cls and node:
+                hoisted_assign.append(f'class {node.group(1)} {cls}')
+        else:
+            hoisted_defs.append(tail)
+    if hoisted_defs or hoisted_assign:
+        seen_h = set()
+        extra = [d for d in hoisted_defs + hoisted_assign
+                 if not (d in seen_h or seen_h.add(d))]
+        out_lines.append('')
+        out_lines.extend(extra)
+    mmd_str = '\n'.join(out_lines)
+
     # 5b. Drop duplicate edge statements. Models like to restate every edge in a
     #     trailing block after the subgraphs; mermaid then draws each arrow twice,
     #     which looks like a doubled line and also inflates the branch count so a

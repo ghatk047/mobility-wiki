@@ -92,6 +92,24 @@ print("\n4. Label character cleaning:")
 check("parentheses stripped from inside labels",
       "(" not in OUT.split("classDef")[0].replace("([", "").replace("])", ""))
 
+print("\n5. Inline classDef hoisting (real mmdc parse error from ea-03):")
+INLINE = ('flowchart TB\n'
+          '  subgraph L1["Layer"]\n'
+          '    A3["Production AV stack\\nSourcing is limited"] classDef sparse fill:#f8fafc,stroke:#94a3b8,stroke-dasharray: 6 4\n'
+          '    B2["Remote assistance\\nSourcing is limited"] classDef sparse fill:#f8fafc,stroke:#94a3b8,stroke-dasharray: 6 4\n'
+          '  end\n')
+OI = sanitise_mermaid(INLINE)
+inline_left = [l for l in OI.split("\n")
+               if "classDef" in l and not l.strip().startswith("classDef")]
+check("no classDef left inline", not inline_left, str(inline_left[:1]))
+check("classDef hoisted to its own line",
+      any(l.strip().startswith("classDef sparse") for l in OI.split("\n")))
+check("duplicate classDef collapsed to one",
+      sum(1 for l in OI.split("\n") if l.strip().startswith("classDef sparse")) == 1)
+check("class assignment synthesised for A3", "class A3 sparse" in OI)
+check("class assignment synthesised for B2", "class B2 sparse" in OI)
+check("node label preserved", 'A3["Production AV stack' in OI or "A3[Production AV stack" in OI)
+
 print("\n" + "-" * 74)
 print("SANITISED OUTPUT:")
 print("-" * 74)

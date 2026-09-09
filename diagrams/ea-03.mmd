@@ -1,0 +1,85 @@
+%%{init: {'theme':'base','fontFamily':'Helvetica Neue, Helvetica, Arial, sans-serif','themeVariables':{'fontSize':'13px'}}}%%
+flowchart TB
+
+  subgraph DEPOT["🚚 AV Depot Operations"]
+    direction TB
+    A1_DepotTech["AV Depot Technician\nVehicle maintenance - Calibration"]
+    A2_SpareParts["Spare Parts Inventory\nManagement - Replenishment"]
+    A3_ProductionStack["Production AV software stack\nPerception - Prediction - Planning - Control\nSourcing is limited"] classDef sparse fill:#f8fafc,stroke:#94a3b8,color:#64748b,stroke-dasharray: 6 4
+    A1_DepotTech -->|"vehicle status"| A2_SpareParts
+    A2_SpareParts -->|"spare parts list"| A1_DepotTech
+  end
+
+  subgraph DISPATCH["📋 Dispatch and Fleet Management"]
+    direction TB
+    B1_DispatchCenter["Dispatch Center\nRoute planning - Vehicle allocation"]
+    B2_RemoteAssistance["Remote Assistance / Fleet Response Tooling\nIncident response - Remote control\nSourcing is limited"] classDef sparse fill:#f8fafc,stroke:#94a3b8,color:#64748b,stroke-dasharray: 6 4
+    B1_DispatchCenter -->|"dispatch orders"| B2_RemoteAssistance
+    B2_RemoteAssistance -->|"incident reports"| B1_DispatchCenter
+  end
+
+  subgraph SIMULATION["💻 Simulation and Testing"]
+    direction TB
+    C1_Carcraft["Carcraft\nSimulation replay - Scenario engine"]
+    C2_SimulationCity["Simulation City\nHigher-fidelity successor"]
+    C3_Castle["Castle\nReconfigurable closed-course test facility"]
+    C1_Carcraft -->|"virtual vehicle telemetry"| C2_SimulationCity
+    C2_SimulationCity -->|"test results"| C3_Castle
+  end
+
+  subgraph REGULATORY["⚖️ Regulatory Compliance"]
+    direction TB
+    D1_CA_DMV_Report["CA DMV Autonomous Vehicle Disengagement Report\nAnnual disengagement - Collision reporting"]
+    D2_RegulatoryAffairs["Regulatory Affairs Manager - AV\nCompliance monitoring - Reporting"]
+    D1_CA_DMV_Report -->|"disengagement data"| D2_RegulatoryAffairs
+    D2_RegulatoryAffairs -->|"compliance status"| D1_CA_DMV_Report
+  end
+
+  subgraph FLEET["🚗 Fleet Operations"]
+    direction TB
+    E1_ZeekrPlatform["Zeekr platform\nVehicle deployment - Fleet expansion"]
+    E2_FleetResponse["Fleet Response Specialist\nIncident management - Vehicle recovery"]
+    E1_ZeekrPlatform -->|"fleet status"| E2_FleetResponse
+    E2_FleetResponse -->|"response actions"| E1_ZeekrPlatform
+  end
+
+  subgraph REMOTEASSISTANCE["🔧 Remote Assistance"]
+    direction TB
+    F1_RemoteAssistanceTool["Remote Assistance Tool\nIncident monitoring - Control commands\nSourcing is limited"] classDef sparse fill:#f8fafc,stroke:#94a3b8,color:#64748b,stroke-dasharray: 6 4
+    F2_Operator["Remote Assistance Operator\nMonitoring - Decision making"]
+    F1_RemoteAssistanceTool -->|"vehicle telemetry"| F2_Operator
+    F2_Operator -->|"control commands"| F1_RemoteAssistanceTool
+  end
+
+  subgraph SAFETYCASE["🛡️ Safety Case Engineering"]
+    direction TB
+    G1_SafetyCaseEngineer["Safety Case Engineer\nRisk assessment - Compliance validation"]
+    G2_AutonomousSpecialist["Autonomous Specialist\nSystem safety analysis - Validation testing"]
+    G1_SafetyCaseEngineer -->|"risk data"| G2_AutonomousSpecialist
+    G2_AutonomousSpecialist -->|"validation results"| G1_SafetyCaseEngineer
+  end
+
+  A3_ProductionStack -->|"vehicle telemetry"| B1_DispatchCenter
+  B1_DispatchCenter -->|"dispatch orders"| E1_ZeekrPlatform
+  E1_ZeekrPlatform -->|"fleet status"| F1_RemoteAssistanceTool
+  F1_RemoteAssistanceTool -->|"control commands"| E2_FleetResponse
+  E2_FleetResponse -->|"response actions"| B2_RemoteAssistance
+  B2_RemoteAssistance -->|"incident reports"| D1_CA_DMV_Report
+  D1_CA_DMV_Report -->|"disengagement data"| G1_SafetyCaseEngineer
+  G2_AutonomousSpecialist -->|"validation results"| C3_Castle
+
+  classDef depot fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+  classDef dispatch fill:#fff7ed,stroke:#ea580c,color:#7c2d12
+  classDef simulation fill:#ecfeff,stroke:#0891b2,color:#164e63
+  classDef regulatory fill:#f8fafc,stroke:#94a3b8,color:#64748b
+  classDef fleet fill:#d1e7dd,stroke:#059669,color:#064e3b
+  classDef remoteassistance fill:#fceae8,stroke:#dc2626,color:#7f1d1d
+  classDef safetycase fill:#fee2e2,stroke:#be1819,color:#7c2d12
+
+  class A1_DepotTech,A2_SpareParts,A3_ProductionStack depot
+  class B1_DispatchCenter,B2_RemoteAssistance dispatch
+  class C1_Carcraft,C2_SimulationCity,C3_Castle simulation
+  class D1_CA_DMV_Report,D2_RegulatoryAffairs regulatory
+  class E1_ZeekrPlatform,E2_FleetResponse fleet
+  class F1_RemoteAssistanceTool,F2_Operator remoteassistance
+  class G1_SafetyCaseEngineer,G2_AutonomousSpecialist safetycase

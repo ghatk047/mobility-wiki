@@ -1,0 +1,86 @@
+%%{init: {'theme':'base','fontFamily':'Helvetica Neue, Helvetica, Arial, sans-serif','themeVariables':{'fontSize':'13px'}}}%%
+flowchart TB
+
+  subgraph EXT["🌐 External Feeds"]
+    direction LR
+    FAA["FAA SWIM\nNOTAMs - TFRs - Slots"]
+    WX["Jeppesen WSI\nWeather - Winds - SIGMETs"]
+    OSM["OpenStreetMap\nBase map data"]
+    GMP["Google Maps Platform\nGeocoding - routing - traffic feeds"]
+  end
+
+  subgraph MATCHING["🔍 Matching and Assignment"]
+    direction TB
+    Michelangelo["Uber Michelangelo\nML platform - ~400 active ML projects"]
+    DeepETA["Uber DeepETA\nETA residual model - 100M+ parameters"]
+    H3["Uber H3\nHexagonal hierarchical geospatial index"]
+    HotIndex["Hot-index updater / map-matching service\nConsumes location events, map-snaps points, converts to H3 cell"]
+    Checkr["Checkr\nBackground check API - MVR and criminal screening"]
+  end
+
+  subgraph DISPATCH["📋 Dispatch and Routing"]
+    direction TB
+    MichelangeloOnline["Michelangelo Online Prediction Service\nLow-latency model serving used by ETA, matching, fraud and Eats ranking"]
+    UberDispatch["Uber internal\nDemand signal through supply positioning - assignment - routing"]
+    DoorDashADP["DoorDash Autonomous Delivery Platform\nOrchestration layer routing orders across couriers, robots and drones"]
+    BoltAI["Bolt AI-equipped e-scooter\nOn-vehicle AI for compliant-riding detection"]
+  end
+
+  subgraph PAYMENTS["💰 Payments and Settlements"]
+    direction TB
+    StripeConnect["Stripe Connect\nMarketplace payments and split payouts"]
+    Braintree["Braintree\nCard processing and stored payment credentials"]
+  end
+
+  subgraph COMMUNICATIONS["📞 Communications"]
+    direction TB
+    Twilio["Twilio\nMasked-number voice/SMS between rider and driver"]
+  end
+
+  subgraph DATA_INFRA["📊 Data Infrastructure"]
+    direction TB
+    MDS["Mobility Data Specification 2.0\nProvider API - Agency API - Policy API"]
+    GBFS["GBFS General Bikeshare Feed Specification\nPublic real-time vehicle availability feed"]
+    Lacuna["Lacuna Technologies\nDigital right-of-way and curb policy enforcement"]
+  end
+
+  subgraph OPERATIONS["🖥 Operations Control"]
+    direction TB
+    Joyride["Joyride Fleet Management Dashboard\nOperator-side fleet control, IoT vehicle state and MDS/GBFS feed generation"]
+    RideReport["Ride Report\nCity micromobility permit compliance, fleet-cap monitoring and reporting"]
+  end
+
+  FAA -->|"NOTAMs - flow programs"| Michelangelo
+  WX -->|"meteorological data"| Michelangelo
+  OSM -->|"base map data"| Michelangelo
+  GMP -->|"geocoding - routing - traffic feeds"| Michelangelo
+  Michelangelo -->|"ML predictions"| DeepETA
+  DeepETA -->|"residual ETA"| UberDispatch
+  H3 -->|"driver-state sharding"| HotIndex
+  HotIndex -->|"DriverState and cell membership"| UberDispatch
+  Checkr -->|"background checks"| UberDispatch
+  StripeConnect -->|"payment processing"| Braintree
+  Twilio -->|"voice/SMS communication"| UberDispatch
+  MDS -->|"real-time data ingestion"| Lacuna
+  GBFS -->|"vehicle availability feed"| Lacuna
+  Joyride -->|"fleet control"| RideReport
+
+  classDef ext fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+  classDef match fill:#fff7ed,stroke:#ea580c,color:#7c2d12
+  classDef disp fill:#ecfeff,stroke:#0891b2,color:#164e63
+  classDef pay fill:#fde0dc,stroke:#ef4444,color:#991b1b
+  classDef comm fill:#e0f7fa,stroke:#05a6af,color:#0d9488
+  classDef data fill:#ecfeff,stroke:#0891b2,color:#164e63
+  classDef ops fill:#ecfeff,stroke:#0891b2,color:#164e63
+  classDef hero fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  classDef sparse fill:#f8fafc,stroke:#94a3b8,color:#64748b,stroke-dasharray: 6 4
+
+  class FAA,WX,OSM,GMP ext
+  class Michelangelo,DeepETA,H3,HotIndex,Checkr match
+  class MichelangeloOnline,UberDispatch,DoorDashADP,BoltAI disp
+  class StripeConnect,Braintree pay
+  class Twilio comm
+  class MDS,GBFS,Lacuna data
+  class Joyride,RideReport ops
+
+  class Michelangelo hero

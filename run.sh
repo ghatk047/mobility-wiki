@@ -95,11 +95,24 @@ EOF
 setup_env() {
   export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
 
-  if [[ -z "${GITHUB_TOKEN:-}" ]]; then
-    if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-      GITHUB_TOKEN="$(gh auth token)"
-      export GITHUB_TOKEN
+  # A GITHUB_TOKEN inherited from the shell profile is NOT trusted on sight —
+  # a stale or placeholder value there is worse than an empty one, because the
+  # generator gets four rounds of HTTP 401 per file and throws away real work.
+  # Validate whatever is present against the API and fall back to the gh keychain.
+  local tok_ok=0
+  if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    if [[ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              https://api.github.com/user)" == "200" ]]; then
+      tok_ok=1
+    else
+      warn "GITHUB_TOKEN in the environment is not valid (${#GITHUB_TOKEN} chars) — ignoring it"
+      unset GITHUB_TOKEN
     fi
+  fi
+  if (( ! tok_ok )) && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+    GITHUB_TOKEN="$(gh auth token)"
+    export GITHUB_TOKEN
   fi
 
   # mmdc needs a Chrome it can actually find; puppeteer's copy is the reliable one
@@ -142,9 +155,17 @@ preflight() {
   fi
 
   if [[ -n "${GITHUB_TOKEN:-}" ]]; then
-    ok "GITHUB_TOKEN present (${#GITHUB_TOKEN} chars, ${GITHUB_TOKEN:0:4}…)"
+    local code
+    code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 \
+             -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/user)"
+    if [[ "$code" == "200" ]]; then
+      ok "GITHUB_TOKEN valid (${#GITHUB_TOKEN} chars, ${GITHUB_TOKEN:0:4}…, API 200)"
+    else
+      warn "GITHUB_TOKEN present but rejected by the API (HTTP $code). Fix with: gh auth login"
+      fail=1
+    fi
   else
-    warn "GITHUB_TOKEN not set and gh not authenticated. Fix with: gh auth login"; fail=1
+    warn "no usable GITHUB_TOKEN and gh not authenticated. Fix with: gh auth login"; fail=1
   fi
 
   local missing=0
