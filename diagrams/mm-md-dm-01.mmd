@@ -1,65 +1,57 @@
 %%{init: {'theme':'base','fontFamily':'Helvetica Neue, Helvetica, Arial, sans-serif','themeVariables':{'fontSize':'13px'}}}%%
 flowchart LR
   subgraph P1[Phase 1: Data Ingestion]
-    Start([Start]) --> NodeA[Data Ingestion\\nGBFS General Bikeshare Feed Specification]
-    NodeA --> DecisionA{Ingestion successful?}
-    DecisionA -- Yes --> NodeB[Demand Pattern Recognition\\nUber Michelangelo Uber internal]
-    DecisionA -- No --> Exception1([Exception])
+    A([Start]) --> B[Ingest data\nHot-index updater / map-matching service]
+    B --> C{Data completeness\nabove 95%?}
+    C -- Yes --> D[Distribute to systems\nUber Michelangelo]
+    C -- No --> E[Backfill from last known state\nand flag degraded confidence]
+    E --> B
   end
 
-  subgraph P2[Phase 2: Demand Analysis]
-    NodeB --> DecisionB{Pattern recognized?}
-    DecisionB -- Yes --> NodeC[Supply Positioning Analysis\\nJoyride Fleet Management Dashboard Joyride]
-    DecisionB -- No --> Exception2([Exception])
+  subgraph P2[Phase 2: Demand Aggregation]
+    D --> F[Aggregate demand\ndata Uber Michelangelo]
+    F --> G{Demand volume\nabove threshold?}
+    G -- Yes --> H[Generate initial forecast\nUber Michelangelo]
+    G -- No --> I[Wait for surge conditions]
   end
 
-  subgraph P3[Phase 3: Supply and Rebalancing]
-    NodeC --> DecisionC{Supply positions analyzed?}
-    DecisionC -- Yes --> NodeD[Rebalancing Strategy Generation\\nJoyride Fleet Management Dashboard Joyride]
-    DecisionC -- No --> Exception3([Exception])
-    NodeD --> DecisionD{Strategy generated?}
-    DecisionD -- Yes --> NodeE[Rebalancing Execution\\nJoyride Fleet Management Dashboard Joyride]
-    DecisionD -- No --> Exception4([Exception])
+  subgraph P3[Phase 3: Supply Assessment]
+    H --> J[Evaluate supply\nJoyride Fleet Management Dashboard]
+    J --> K{Supply availability\nbelow threshold?}
+    K -- Yes --> L[Trigger redistribution\nJoyride Fleet Management Dashboard]
+    K -- No --> M[Match demand and supply\nUber Michelangelo]
   end
 
-  subgraph P4[Phase 4: Feedback and Compliance]
-    NodeE --> DecisionE{Rebalancing executed?}
-    DecisionE -- Yes --> NodeF[Feedback Loop Establishment\\nJoyride Fleet Management Dashboard Joyride]
-    DecisionE -- No --> Exception5([Exception])
-    NodeF --> NodeG[Compliance Monitoring\\nRide Report Ride Report]
+  subgraph P4[Phase 4: Matching Dispatch]
+    M --> N[Generate dispatch instructions\nUber DeepETA]
+    N --> O{Ride accepted?}
+    O -- Yes --> P[Dispatch vehicle\nUber DeepETA]
+    O -- No --> Q[Retry dispatch or cancel]
+    Q --> M
   end
 
-  subgraph P5[Phase 5: Policy and Reporting]
-    NodeG --> DecisionG{Compliance monitored?}
-    DecisionG -- Yes --> NodeH[Policy Communication\\nPopulus Mobility Manager Populus AI]
-    DecisionG -- No --> Exception6([Exception])
-    NodeH --> NodeI[Performance Reporting\\nJoyride Fleet Management Dashboard Joyride]
+  subgraph P5[Phase 5: Feedback Retraining]
+    P --> R[Evaluate ride completion\nUber Michelangelo]
+    R --> S{Ride quality\ngood enough?}
+    S -- Yes --> T[Update model parameters\nMichelangelo Online Prediction Service]
+    S -- No --> U[Re-evaluate and retrain model]
   end
 
-  subgraph P6[Phase 6: Continuous Improvement]
-    NodeI --> DecisionI{Policy communicated?}
-    DecisionI -- Yes --> NodeJ[Continuous Improvement Planning\\nUber Michelangelo Uber internal]
-    DecisionI -- No --> Exception7([Exception])
-    NodeJ --> NodeK[System Maintenance\\nUber Michelangelo Uber internal]
-    NodeK --> DecisionK{Maintenance complete?}
-    DecisionK -- Yes --> NodeL[Risk Assessment\\nJoyride Fleet Management Dashboard Joyride]
-    DecisionK -- No --> Exception8([Exception])
+  subgraph P6[Phase 6: Compliance Monitoring]
+    U --> V[Monitor compliance\nRide Report]
+    V --> W{Compliance issues raised?}
+    W -- Yes --> X[Escalate to higher authority]
+    W -- No --> Y[Communicate policy updates\nPopulus Mobility Manager]
+    Y --> Z([End])
   end
 
-  style Start fill:#0f2a5c,color:#fff,stroke:#0f2a5c
-  style Exception1 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
-  style Exception2 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
-  style Exception3 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
-  style Exception4 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
-  style Exception5 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
-  style Exception6 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
-  style Exception7 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
-  style Exception8 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
-  style DecisionA fill:#10b3c6,color:#fff,stroke:#10b3c6
-  style DecisionB fill:#10b3c6,color:#fff,stroke:#10b3c6
-  style DecisionC fill:#10b3c6,color:#fff,stroke:#10b3c6
-  style DecisionD fill:#10b3c6,color:#fff,stroke:#10b3c6
-  style DecisionE fill:#10b3c6,color:#fff,stroke:#10b3c6
-  style DecisionG fill:#10b3c6,color:#fff,stroke:#10b3c6
-  style DecisionI fill:#10b3c6,color:#fff,stroke:#10b3c6
-  style DecisionK fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style A fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style Z fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style Q fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style U fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style W fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style C fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style G fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style K fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style O fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style S fill:#10b3c6,color:#fff,stroke:#10b3c6

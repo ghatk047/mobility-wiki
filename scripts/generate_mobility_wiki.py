@@ -352,9 +352,51 @@ def sanitise_mermaid(mmd_str):
         text = re.sub(r'  +', ' ', text).strip()
         return f'{m.group(1)}{text}{m.group(3)}'
 
+    # 4b. Normalise line-break escapes to exactly ONE backslash + n, which is what
+    #     mermaid wants. Verified against mmdc 11.12.0: `\\n` renders a proper two-line
+    #     label, `\\\\n` breaks the line but leaves a stray backslash in the text, and a
+    #     lone `\\\\` with no n renders as a literal backslash and no break. Models emit
+    #     all three, so every run of backslashes around an optional n is collapsed.
+    #     A backslash has no other legitimate use inside a mermaid label.
+    def _fix_breaks_in_label(m):
+        inner = re.sub(r'\\{2,}n', r'\\n', m.group(2))     # \\n and longer -> \n
+        inner = re.sub(r'\\{2,}(?!n)', r'\\n', inner)      # stray \\ with no n -> \n
+        return f'{m.group(1)}{inner}{m.group(3)}'
+
+    mmd_str = re.sub(r'(\[)([^\]]+)(\])', _fix_breaks_in_label, mmd_str)
+    mmd_str = re.sub(r'(\{)([^}]+)(\})', _fix_breaks_in_label, mmd_str)
     mmd_str = re.sub(r'(\[)([^\]]+)(\])', clean_label, mmd_str)
     mmd_str = re.sub(r'(\{)([^}]+)(\})', clean_label, mmd_str)
     mmd_str = re.sub(r'(\()([^)]+)(\))', clean_label, mmd_str)
+    # 5b. Drop duplicate edge statements. Models like to restate every edge in a
+    #     trailing block after the subgraphs; mermaid then draws each arrow twice,
+    #     which looks like a doubled line and also inflates the branch count so a
+    #     thin diagram scores well. A repeated identical edge is never intentional
+    #     here. Lines that also DEFINE a node shape are kept, since dropping one
+    #     would lose the node's label.
+    #     A line is only DROPPED when it is a bare edge (no node shape on it) and
+    #     every edge it declares has already been seen. Shape-bearing lines always
+    #     survive, but still register their edges so a later bare restatement of
+    #     the same edge is recognised as the duplicate.
+    _bare_edge = re.compile(
+        r'^[A-Za-z][A-Za-z0-9_]*'
+        r'(?:\s*--\s*[^->|\n]*?)?\s*-->(?:\s*\|[^|\n]*\|)?\s*'
+        r'[A-Za-z][A-Za-z0-9_]*$')
+    seen_edges = set()
+    kept = []
+    for line in mmd_str.split('\n'):
+        stripped = line.strip()
+        pairs = parse_edges(stripped)
+        if pairs:
+            is_bare = bool(_bare_edge.fullmatch(stripped))
+            if is_bare and all(p in seen_edges for p in pairs):
+                continue
+            seen_edges.update(pairs)
+        kept.append(line)
+    mmd_str = '\n'.join(kept)
+    # collapse the blank run a dropped trailing block leaves behind
+    mmd_str = re.sub(r'\n{3,}', '\n\n', mmd_str)
+
     # 6. Force one canonical %%{init}%% with a system-resident font stack.
     mmd_str = re.sub(r'^\s*%%\{init.*?\}%%\s*\n?', '', mmd_str,
                      flags=re.DOTALL | re.MULTILINE)
@@ -521,7 +563,8 @@ JSON_SHAPE = """{
 }"""
 
 CONTENT_RULES = """CONTENT RULES:
-- 10 to 12 l4_steps spread across 5 or 6 phases
+- 10 to 12 l4_steps spread across 5 or 6 phases, numbered by phase: 1.1, 1.2,
+  then 2.1, 2.2, then 3.1 and so on. Do NOT number every step 1.x
 - At least 3 steps must be genuine decision points with decision_point Y
 - At least 2 steps must have exception Y
 - Roles must come from the supplied role list for this domain
@@ -585,6 +628,78 @@ BPMN_FORM_EXAMPLE = """flowchart LR
   style P fill:#10b3c6,color:#fff,stroke:#10b3c6"""
 
 
+# The anti-pattern the first generated diagram fell into: every failed decision
+# dead-ends in its own exception terminator, so the "flow" is a linear checklist
+# with eight exits and no rework. Shown to the model explicitly, because telling
+# it to "add rework loops" in prose did not work.
+BPMN_ANTIPATTERN = """WRONG — do not produce this shape:
+
+  NodeA[Ingest data] --> DecA{Ingestion successful?}
+  DecA -- Yes --> NodeB[Recognise pattern]
+  DecA -- No  --> Exception1([Exception])
+  NodeB --> DecB{Pattern recognised?}
+  DecB -- Yes --> NodeC[Analyse supply]
+  DecB -- No  --> Exception2([Exception])
+
+Three things are wrong with it:
+  1. Every No branch dead-ends in a NEW exception terminator. Nothing ever routes
+     back to earlier work, so there is no rework and no cycle in the graph.
+  2. The decisions are not decisions. "Ingestion successful?", "Pattern
+     recognised?" and "Strategy generated?" just ask whether the previous step
+     worked. That is error handling, not a business decision.
+  3. It uses one exception terminator per decision. Use at MOST two or three
+     terminators in the whole diagram, shared by several branches.
+
+RIGHT — the same region done properly:
+
+  ING[Ingest supply and demand events\\nGBFS feed and trip event stream] --> QUAL{Feed completeness\\nabove 95 percent?}
+  QUAL -- No --> BACKFILL[Backfill from last known state\\nand flag degraded confidence]
+  BACKFILL --> ING
+  QUAL -- Yes --> FCST[Generate short-horizon forecast\\nMichelangelo online prediction]
+  FCST --> ACC{Forecast error inside\\ntolerance band?}
+  ACC -- No --> RETRAIN[Trigger retraining and\\nfall back to baseline model]
+  RETRAIN --> FCST
+  ACC -- Yes --> POS[Publish positioning guidance\\nto supply heat map]
+
+Note what changed: BACKFILL routes back to ING and RETRAIN routes back to FCST,
+so the graph contains real cycles. The decisions name a threshold and a business
+condition, not "did it work". No exception terminator was needed at all here."""
+
+
+def archetype_directive(proc):
+    """Tier 1 is the SHARED core. Its processes must read across every archetype
+    they touch, with the differences pushed into archetype_notes. The first
+    generated page narrowed MM-MD-DM-01 to micromobility alone because the
+    registry brief injects several archetype slices and the model latched onto
+    one of them."""
+    archs = L1_ARCHETYPES.get(proc["l1"], [])
+    pretty = ", ".join(a.replace("-", " ") for a in archs if a != "shared-enterprise")
+    if proc["tier"] == 1:
+        return (
+            f"ARCHETYPE SCOPE — this is a TIER 1 SHARED CORE process. It runs across "
+            f"ALL of these archetypes: {pretty}.\n"
+            f"  * Write the description, trigger, outcome and steps so they hold for EVERY\n"
+            f"    one of those archetypes. Do NOT open with 'This process applies to the\n"
+            f"    X archetype' and do not narrow the whole process to one of them.\n"
+            f"  * Draw systems from MORE THAN ONE archetype slice, so the steps reflect the\n"
+            f"    shared mechanism rather than one operator's stack.\n"
+            f"  * Put the differences BETWEEN archetypes in archetype_notes, and only there.\n"
+            f"    That field is where 'ride-hail matches drivers, micromobility rebalances\n"
+            f"    vehicles, delivery assigns couriers' belongs.\n"
+        )
+    if proc["tier"] == 2:
+        return (
+            f"ARCHETYPE SCOPE — this is a TIER 2 ARCHETYPE-SPECIFIC process, particular to: "
+            f"{pretty}. Write it specifically for that operating model. Do not genericise it "
+            f"into a marketplace process.\n"
+        )
+    return (
+        f"ARCHETYPE SCOPE — this is a TIER 3 CROSS-CUTTING ENTERPRISE process. It applies "
+        f"across the business. Keep it archetype-neutral unless a specific archetype "
+        f"materially changes the work, and note that in archetype_notes.\n"
+    )
+
+
 def generate_process_content(proc, attempt=0):
     """Call 1 — content JSON, no Mermaid."""
     backend = backend_for(proc["l1"])
@@ -595,6 +710,7 @@ def generate_process_content(proc, attempt=0):
         f"  L1 Domain  : {proc['l1_name']}\n"
         f"  L2 Group   : {proc['l2_name']}\n"
         f"  L3 Process : {proc['name']}\n\n"
+        f"{archetype_directive(proc)}\n"
         f"GROUNDING BLOCK — verified facts, these override your training data:\n"
         f"{registry_brief(proc['l1'])}\n\n"
         f"Return exactly this JSON shape:\n{JSON_SHAPE}\n\n{CONTENT_RULES}\n"
@@ -619,7 +735,48 @@ def generate_process_content(proc, attempt=0):
     return None
 
 
-def generate_process_mermaid(proc, data, attempt=0):
+def repair_directive(prev_metrics, prev_degenerate):
+    """Targeted feedback for a retry. Restating the generic rule does not work —
+    qwen2.5-coder:14b produced 9 degenerate decisions and 0 substantive ones across
+    three drafts of MM-MD-DM-01 with the anti-pattern example already in the prompt.
+    Naming the model's own offending labels back to it does work."""
+    if not prev_metrics:
+        return ""
+    lines = ["YOUR PREVIOUS ATTEMPT WAS REJECTED. Fix these specific problems:"]
+    if prev_degenerate:
+        lines.append(
+            f"  * You wrote {len(prev_degenerate)} decisions that only ask whether the "
+            f"previous step worked. These are BANNED. Here are the exact ones you wrote:")
+        for d in prev_degenerate[:6]:
+            lines.append(f"      REJECTED: {d}")
+        lines.append(
+            "    Every one must be REPLACED by a decision naming a threshold or a business\n"
+            "    condition. Rewrite them along these lines:\n"
+            "      'Data ingestion successful?'   -> 'Feed completeness above 95 percent?'\n"
+            "      'Forecast validation passed?'  -> 'Forecast error within tolerance band?'\n"
+            "      'Strategy generated?'          -> 'Projected utilisation above target?'\n"
+            "      'Adjustment successful?'       -> 'Supply gap closed below 10 percent?'\n"
+            "    Each decision label must contain a NUMBER or one of: above, below, within,\n"
+            "    exceeds, breached, threshold, cap, tolerance, approved, cleared, granted,\n"
+            "    eligible, compliant, triggered, detected, met, expired.")
+    if prev_metrics.get("loops", 0) < PID_GATES["loops"]:
+        lines.append(
+            f"  * You produced only {prev_metrics.get('loops', 0)} rework loops. At least "
+            f"{PID_GATES['loops']} are required. Point a failed decision back to an EARLIER "
+            f"task node so the graph contains a cycle.")
+    if prev_metrics.get("nodes", 99) < PID_FLOOR["nodes"]:
+        lines.append(f"  * Only {prev_metrics.get('nodes')} nodes. At least "
+                     f"{PID_FLOOR['nodes']} are required.")
+    lo, hi = TERMINATOR_BAND
+    t = prev_metrics.get("terminators", 0)
+    if not (lo <= t <= hi):
+        lines.append(f"  * {t} terminators. Use between {lo} and {hi}, sharing one exception "
+                     f"terminator across several failed branches.")
+    return "\n".join(lines) + "\n\n"
+
+
+def generate_process_mermaid(proc, data, attempt=0, prev_metrics=None,
+                             prev_degenerate=None):
     """Call 2 — raw Mermaid only, so no \\n survives a JSON string round trip."""
     backend = backend_for(proc["l1"])
     steps = "\n".join(
@@ -631,12 +788,15 @@ def generate_process_mermaid(proc, data, attempt=0):
     regs = registry_regs_for(proc["l1"])
     reg_hint = ", ".join(r["citation"] for r in regs[:6]) or "none specific"
     user = (
+        f"{repair_directive(prev_metrics, prev_degenerate)}"
         f"Draw the BPMN process flow for {proc['pid']} — {proc['name']}\n"
         f"in the {proc['l1_name']} domain of a mobility platform.\n\n"
+        f"{archetype_directive(proc)}\n"
         f"These are the L4 steps it must cover:\n{steps}\n\n"
         "STRUCTURE — copy this construct exactly. It is from a different industry, so take\n"
         "the FORM and none of the content:\n\n"
         f"{BPMN_FORM_EXAMPLE}\n\n"
+        f"{BPMN_ANTIPATTERN}\n\n"
         "REQUIREMENTS:\n"
         "- flowchart LR with 5 or 6 phase subgraphs named P1 to P6, each titled\n"
         "  Phase N: short phase name.\n"
@@ -648,11 +808,21 @@ def generate_process_mermaid(proc, data, attempt=0):
         "  background check cleared, disengagement triggered, BVLOS waiver approved,\n"
         "  redistribution threshold hit, surge cap breached, merchant accepted in time,\n"
         "  conformity finding raised, geofence violation detected, fleet cap exceeded.\n"
-        "- At least 2 rework loops that route a failed decision BACK to an earlier task node\n"
-        "  rather than straight to an exit. This is what makes the flow multi-path.\n"
+        "  Every decision must name a THRESHOLD or a BUSINESS CONDITION. Never write a\n"
+        "  decision that only asks whether the previous step succeeded.\n"
+        "- MANDATORY: at least 2 rework loops. A rework loop means a failed decision\n"
+        "  points BACK to a task node that appears EARLIER in the flow, forming a cycle,\n"
+        "  as in QUAL -- No --> BACKFILL followed by BACKFILL --> ING. A diagram with no\n"
+        "  cycle is rejected no matter how many nodes it has. Routing a No branch to an\n"
+        "  exception terminator does NOT count as a rework loop.\n"
+        "- At MOST 3 terminators in total, including ([Start]) and ([End]). Several failed\n"
+        "  branches should SHARE one exception terminator. Do not create one per decision.\n"
         "- 22 to 30 nodes overall. Every task label is two lines: what happens, then a\n"
         "  literal backslash-n, then the system or document involved.\n"
-        "  Example: VER[Verify parking photo at end of ride\\\\nMDS feed and operator console]\n"
+        "  The line break is a SINGLE backslash followed by n. Not two backslashes.\n"
+        "  Example: VER[Verify parking photo at end of ride\\nMDS feed and operator console]\n"
+        "  Name each system ONCE in a label. Never repeat the vendor after the product,\n"
+        "  as in 'Joyride Fleet Management Dashboard Joyride'.\n"
         "- Flow must cross subgraph boundaries: a node in P2 connects to nodes in P3 and,\n"
         "  where there is rework, back to P1.\n"
         "- Close with at least 8 style lines. Terminators fill:#0f2a5c,color:#fff,stroke:#0f2a5c\n"
@@ -737,8 +907,55 @@ def extract_json(raw, required=None):
 #   shipping .svg (n=16): median 49 node groups, 13 clusters, 49 edge labels
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Scored metrics — each contributes one point.
 PID_FLOOR = {"nodes": 30, "decisions": 6, "branches": 12, "subgraphs": 5,
-             "styles": 8, "terminators": 2, "loops": 2}
+             "styles": 8, "terminators": 2}
+
+# HARD GATES — a draft that misses one of these fails regardless of its score.
+#
+# loops: the difference between a real BPMN flow and a linear checklist with dead
+#   ends bolted on, so not tradeable against node count. Airline reference
+#   (n=149): median 4 back-edges, 139/149 carry >= 2.
+#
+# substantive_decisions: a decision that only asks whether the previous step
+#   worked ("Ingestion successful?", "Aggregation complete?") is error handling,
+#   not a business decision. Telling the model this in prose did not work — the
+#   second draft of MM-MD-DM-01 still produced 9 of them and 0 real ones — so it
+#   is enforced structurally. Airline reference median is 3.
+PID_GATES = {"loops": 2, "substantive_decisions": 3}
+
+# A decision is DEGENERATE if it merely asks whether the prior step succeeded.
+_DEGENERATE_DECISION = re.compile(
+    r'\b(?:success(?:ful)?|complete[d]?|collected|received|generated|created|'
+    r'recognis?z?ed|analys?z?ed|executed|finished|done|made|performed|'
+    r'processed|ingested|available|valid|ok)\b\s*\??\s*$', re.IGNORECASE)
+
+# A decision is SUBSTANTIVE if it names a threshold, a comparator or a real
+# domain condition.
+_SUBSTANTIVE_DECISION = re.compile(
+    r'\d|\b(?:above|below|within|under|over|exceed\w*|breach\w*|threshold|cap|caps|'
+    r'tolerance|limit|minimum|maximum|percent|sla|band|margin|budget|'
+    r'approved|cleared|granted|waiver|permit|eligible|compliant|conforming|'
+    r'triggered|detected|raised|flagged|violat\w*|met|missed|expired|overdue|'
+    r'greater|less|more than|at least)\b', re.IGNORECASE)
+
+
+def classify_decisions(mmd):
+    """Split decision diamonds into (substantive, degenerate) label lists."""
+    subs, degs = [], []
+    for raw in re.findall(r'[A-Za-z][A-Za-z0-9_]*\{([^}]+)\}', mmd):
+        clean = raw.replace('\\n', ' ').strip()
+        if _SUBSTANTIVE_DECISION.search(clean) and not _DEGENERATE_DECISION.search(clean):
+            subs.append(clean)
+        else:
+            degs.append(clean)
+    return subs, degs
+
+# Terminators are scored as a BAND, not a floor. The first generated draft of
+# MM-MD-DM-01 scored a point for 9 terminators — every "No" branch dead-ended in
+# its own ([Exception]) node, which is the anti-pattern, not richness.
+TERMINATOR_BAND = (2, 6)
+
 EA_FLOOR = {"nodes": 22, "labelled": 12, "subgraphs": 5, "classdefs": 5}
 
 
@@ -748,33 +965,96 @@ def _node_ids(mmd):
                   "class", "direction", "end"}
 
 
-def diagram_richness(mmd):
-    """Structural score so a thin diagram gets retried, not silently published."""
-    if not mmd:
-        return 0, {}
-    # A rework loop: an edge whose target appears earlier in the file than its source.
-    order, seq = {}, 0
-    for nid in re.findall(r'^\s*([A-Za-z][A-Za-z0-9_]*)\s*(?:\[|\{|\(\[)', mmd,
-                          flags=re.MULTILINE):
-        if nid not in order:
-            order[nid] = seq
-            seq += 1
-    loops = 0
-    for src, dst in re.findall(r'([A-Za-z][A-Za-z0-9_]*)\s*(?:--[^->\n]*)?-->\s*\|?[^|\n]*\|?\s*([A-Za-z][A-Za-z0-9_]*)', mmd):
-        if src in order and dst in order and order[dst] < order[src]:
-            loops += 1
+def parse_edges(mmd):
+    """Every A --> B edge, in all four mermaid arrow forms:
+    A --> B  /  A -- label --> B  /  A -->|label| B  /  A[x] --> B[y]"""
+    body = re.sub(r'^\s*(?:classDef|style|class)\s.*$', '', mmd, flags=re.MULTILINE)
+    pat = re.compile(
+        r'([A-Za-z][A-Za-z0-9_]*)'
+        r'(?:\s*(?:\[[^\]]*\]|\{[^}]*\}|\(\[[^\]]*\]\)|\([^)]*\)))?'
+        r'\s*(?:--\s*[^->|\n]*?\s*)?-->'
+        r'(?:\s*\|[^|\n]*\|)?'
+        r'\s*([A-Za-z][A-Za-z0-9_]*)')
+    edges = []
+    for line in body.split('\n'):
+        pos = 0
+        while True:
+            m = pat.search(line, pos)
+            if not m:
+                break
+            edges.append((m.group(1), m.group(2)))
+            pos = m.start(2)                      # allow A --> B --> C chains
+    return edges
 
+
+def count_rework_loops(mmd):
+    """A rework loop is a CYCLE in the flow graph — a failed decision routed back
+    to earlier work. A dead-end ([Exception]) terminator creates no cycle, which
+    is exactly the distinction we need.
+
+    The previous implementation compared first-appearance order and indexed only
+    nodes declared at the start of a line. In practice most nodes are declared
+    mid-line as an arrow target, so the index was nearly empty and it reported
+    zero loops on all 149 airline reference diagrams, which visibly contain them.
+    """
+    adj = {}
+    for src, dst in parse_edges(mmd):
+        adj.setdefault(src, []).append(dst)
+        adj.setdefault(dst, [])
+    WHITE, GREY, BLACK = 0, 1, 2
+    colour = {n: WHITE for n in adj}
+    back = 0
+
+    def dfs(root):
+        nonlocal back
+        stack = [(root, iter(adj[root]))]
+        colour[root] = GREY
+        while stack:
+            node, it = stack[-1]
+            for nxt in it:
+                if colour[nxt] == GREY:
+                    back += 1
+                elif colour[nxt] == WHITE:
+                    colour[nxt] = GREY
+                    stack.append((nxt, iter(adj[nxt])))
+                    break
+            else:
+                colour[node] = BLACK
+                stack.pop()
+
+    for n in list(adj):
+        if colour[n] == WHITE:
+            dfs(n)
+    return back
+
+
+def diagram_richness(mmd):
+    """Returns (score, metrics, gate_failures). A non-empty gate_failures list
+    means the draft is unacceptable however high the score."""
+    if not mmd:
+        return 0, {}, list(PID_GATES)
     m = {
         "nodes":       len(_node_ids(mmd)),
         "decisions":   len(set(re.findall(r'([A-Za-z][A-Za-z0-9_]*)\{[^}]+\}', mmd))),
-        "branches":    len(re.findall(r'--\s*[^->\n|]{1,40}?\s*-->', mmd)) + mmd.count('-->|'),
+        # Count UNIQUE labelled branches. Counting raw occurrences let a model
+        # inflate the score by restating every edge after the subgraphs.
+        "branches":    len({(s, d) for s, d in parse_edges(mmd)}),
         "subgraphs":   mmd.count("subgraph"),
         "styles":      len(re.findall(r'^\s*style\s', mmd, flags=re.MULTILINE)),
         "terminators": len(re.findall(r'\(\[', mmd)),
-        "loops":       loops,
+        "loops":       count_rework_loops(mmd),
+        "substantive_decisions": len(classify_decisions(mmd)[0]),
     }
-    score = sum(1 for k, floor in PID_FLOOR.items() if m[k] >= floor)
-    return score, m
+    score = 0
+    for k, floor in PID_FLOOR.items():
+        if k == "terminators":
+            lo, hi = TERMINATOR_BAND
+            if lo <= m[k] <= hi:
+                score += 1
+        elif m[k] >= floor:
+            score += 1
+    gate_failures = [k for k, need in PID_GATES.items() if m[k] < need]
+    return score, m, gate_failures
 
 
 def ea_richness(mmd):
@@ -861,27 +1141,51 @@ def finalize_svg(path):
 
 
 def build_diagram(proc, data):
-    """Generate, score, sanitise and render. Up to 3 drafts; publish the best."""
+    """Generate, score, sanitise and render. Up to 3 drafts; publish the best.
+
+    A draft that fails a hard gate (rework loops) is never accepted early, no
+    matter how well it scores elsewhere — all three drafts are spent trying to
+    get a real one.
+    """
     mmd_path = DIAGRAM_DIR / f"{proc['slug']}.mmd"
     svg_path = IMG_DIR / f"{proc['slug']}.svg"
-    best, best_score, best_metrics = None, -1, {}
+    best, best_key, best_metrics, best_gates = None, (-99, -1), {}, list(PID_GATES)
+    prev_metrics, prev_degenerate = None, None
 
     for attempt in range(3):
-        candidate = generate_process_mermaid(proc, data, attempt=attempt)
-        score, metrics = diagram_richness(candidate)
-        if candidate and score > best_score:
-            best, best_score, best_metrics = candidate, score, metrics
-        log(f"  diagram draft {attempt+1}: score {score}/{len(PID_FLOOR)} {metrics}")
-        if score >= len(PID_FLOOR) - 1:
+        candidate = generate_process_mermaid(proc, data, attempt=attempt,
+                                             prev_metrics=prev_metrics,
+                                             prev_degenerate=prev_degenerate)
+        score, metrics, gates = diagram_richness(candidate)
+        # Rank by FEWEST gate failures first, then score. A draft that clears every
+        # gate always beats a higher-scoring one that does not.
+        key = (-len(gates), score)
+        if candidate and key > best_key:
+            best, best_key, best_metrics, best_gates = candidate, key, metrics, gates
+        # Carry this draft's specific failures into the next attempt.
+        prev_metrics = metrics if candidate else None
+        prev_degenerate = classify_decisions(candidate)[1] if candidate else None
+        gate_note = f" GATE FAIL: {', '.join(gates)}" if gates else " gates ok"
+        log(f"  diagram draft {attempt+1}: score {score}/{len(PID_FLOOR)}{gate_note} {metrics}")
+        if candidate and "substantive_decisions" in gates:
+            _, degs = classify_decisions(candidate)
+            log(f"    degenerate decisions ({len(degs)}): "
+                f"{'; '.join(degs[:4])}", "WARN")
+        if not gates and score >= len(PID_FLOOR) - 1:
             break
 
     if not best:
         return None
-    if best_score < len(PID_FLOOR) - 2:
-        short = [k for k, f in PID_FLOOR.items() if best_metrics.get(k, 0) < f]
-        log(f"  {proc['pid']}: diagram UNDER FLOOR (score {best_score}/{len(PID_FLOOR)}, "
-            f"short on {', '.join(short)}) — publishing anyway, re-run with "
+    if best_gates:
+        log(f"  {proc['pid']}: REJECTED BY GATE after 3 drafts — "
+            f"{', '.join(f'{g} < {PID_GATES[g]}' for g in best_gates)}. "
+            f"A flow with no rework loop is a linear checklist, not a process. "
+            f"Publishing the best draft anyway; re-run with "
             f"--pid {proc['pid']} --force to try again", "WARN")
+    elif best_key[1] < len(PID_FLOOR) - 2:
+        short = [k for k, f in PID_FLOOR.items() if best_metrics.get(k, 0) < f]
+        log(f"  {proc['pid']}: diagram UNDER FLOOR (score {best_key[1]}/{len(PID_FLOOR)}, "
+            f"short on {', '.join(short)}) — publishing anyway", "WARN")
 
     for attempt in range(1, 4):
         ok, info = render_mermaid(best, mmd_path, svg_path, PID_W, PID_H)
