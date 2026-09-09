@@ -12,6 +12,8 @@ generate_mobility_wiki.py, so both files must sit in the same scripts/ folder.
 
 import argparse
 import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor
 import time
 from pathlib import Path
 
@@ -285,7 +287,15 @@ def main():
     ap.add_argument("--id", help="single diagram, e.g. ea-01")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--no-verify", action="store_true")
+    ap.add_argument("-n", "--count", type=int, metavar="N",
+                    help="generate the next N outstanding diagrams, sequentially")
+    ap.add_argument("-j", "--parallel", type=int, default=1, metavar="N",
+                    help="advanced: render N concurrently (default 1 = sequential)")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="list what would be generated, then exit")
     args = ap.parse_args()
+    if args.parallel < 1:
+        sys.exit("--parallel must be at least 1")
 
     for d in (DATA_DIR, DIAGRAM_DIR, IMG_DIR):
         d.mkdir(parents=True, exist_ok=True)
@@ -300,38 +310,65 @@ def main():
                      f"Valid: {', '.join(d[0] for d in EA_DIAGRAMS)}")
     if not args.force:
         targets = [t for t in targets if tr.get(t[0], {}).get("status") != "Complete"]
+    if args.count and not args.id:
+        targets = targets[:args.count]
 
-    done, failed = [], []
-    try:
-        for ea_id, title, scope in targets:
-            l1 = EA_DOMAIN.get(ea_id, "MD")
+    log(f"{len(targets)} EA diagram(s) selected")
+    if args.dry_run:
+        for ea_id, title, _ in targets:
+            log(f"  {ea_id}  {title}")
+        log(f"dry run — nothing generated, nothing pushed "
+            f"({len(targets)} would run, parallel={args.parallel})")
+        return
+    if not targets:
+        log("nothing to do — all EA diagrams Complete (use --force to regenerate)")
+        return
+
+    lock = threading.Lock()
+
+    def run_one(item):
+        ea_id, title, scope = item
+        l1 = EA_DOMAIN.get(ea_id, "MD")
+        try:
             log(f"── {ea_id.upper()} — {title}  [backend: {backend_for(l1)}, registry: {l1}]")
             data = generate_ea(ea_id, title, scope, l1)
             if not data:
-                failed.append(ea_id)
-                continue
+                return ea_id, False
             svg, png = render_ea(ea_id, title, scope, l1, data)
             if not svg:
                 log(f"{ea_id}: diagram failed after 3 attempts — skipped", "ERROR")
-                failed.append(ea_id)
-                continue
+                return ea_id, False
             if not gh_push_file(f"assets/img/{ea_id}.svg", svg.read_bytes(),
                                 f"Add {ea_id.upper()} diagram"):
-                failed.append(ea_id)
-                continue
+                return ea_id, False
             if png:
                 gh_push_file(f"assets/img/{ea_id}.png", png.read_bytes(),
                              f"Add {ea_id.upper()} PNG download")
             if not gh_push_file(f"{EA_DIR_SLUG}/{ea_id}/index.html",
                                 build_ea_page(ea_id, title, scope, data),
                                 f"Add {ea_id.upper()} {title}"):
-                failed.append(ea_id)
-                continue
-            tr[ea_id] = {"status": "Complete",
-                         "url": f"{PAGES_BASE}/{EA_DIR_SLUG}/{ea_id}/index.html"}
-            save_tracker(tr)
-            done.append(ea_id)
+                return ea_id, False
+            with lock:
+                tr[ea_id] = {"status": "Complete",
+                             "url": f"{PAGES_BASE}/{EA_DIR_SLUG}/{ea_id}/index.html"}
+                save_tracker(tr)
             log(f"  pushed {ea_id}")
+            return ea_id, True
+        except Exception as exc:
+            log(f"{ea_id}: unhandled error — {exc}", "ERROR")
+            return ea_id, False
+
+    done, failed = [], []
+    try:
+        if args.parallel > 1:
+            log(f"running {args.parallel} workers in parallel")
+            with ThreadPoolExecutor(max_workers=args.parallel) as pool:
+                for ea_id, ok in pool.map(run_one, targets):
+                    (done if ok else failed).append(ea_id)
+        else:
+            for item in targets:
+                ea_id, ok = run_one(item)
+                (done if ok else failed).append(ea_id)
     except KeyboardInterrupt:
         log("interrupted — publishing what is done", "WARN")
 

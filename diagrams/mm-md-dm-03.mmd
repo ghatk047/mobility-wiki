@@ -1,0 +1,53 @@
+%%{init: {'theme':'base','fontFamily':'Helvetica Neue, Helvetica, Arial, sans-serif','themeVariables':{'fontSize':'13px'}}}%%
+flowchart LR
+  subgraph P1[Phase 1: Identify Event Impact]
+    Start([Start]) --> NodeA[Identify Event Impact\nOpenStreetMap, Google Maps Platform]
+    NodeA --> DecA{Event severity above threshold?}
+    DecA -- Yes --> NodeB[Update Demand Forecast Models\nUber Michelangelo, Uber DeepETA]
+    DecA -- No --> Hold1([Hold])
+  end
+
+  subgraph P2[Phase 2: Adjust Supply Positioning]
+    NodeB --> NodeC[Adjust Supply Positioning\nJoyride Fleet Management Dashboard, Bolt in-house e-bike platform]
+    NodeC --> DecB{Supply adjustment successful?}
+    DecB -- Yes --> NodeD[Notify Affected Operators\nStripe Connect, Braintree]
+    DecB -- No --> NodeA
+  end
+
+  subgraph P3[Phase 3: Monitor Fleet Performance]
+    NodeD --> NodeE[Monitor Fleet Performance\nUber H3, DoorDash Autonomous Delivery Platform]
+    NodeE --> DecC{Fleet performance within tolerance?}
+    DecC -- Yes --> NodeF[Adjust Routing Algorithms\nUber Michelangelo, DoorDash Autonomous Delivery Platform]
+    DecC -- No --> NodeE
+  end
+
+  subgraph P4[Phase 4: Evaluate Event Impact on AV Operations]
+    NodeF --> NodeG[Evaluate Event Impact on AV Operations\nCarcraft, Simulation City]
+    NodeG --> DecD{AV operations stable?}
+    DecD -- Yes --> NodeH[Implement AV Safety Protocols\nZeekr platform, CA DMV Autonomous Vehicle Disengagement Report]
+    DecD -- No --> Hold1
+  end
+
+  subgraph P5[Phase 5: Monitor Weather and Incident Updates]
+    NodeH --> NodeI[Monitor Weather and Incident Updates\nOpenStreetMap, Google Maps Platform]
+    NodeI --> DecE{Weather or incident updates received?}
+    DecE -- Yes --> NodeJ[Adjust Demand and Supply Continuously\nJoyride Fleet Management Dashboard, Bolt in-house e-bike platform]
+    DecE -- No --> NodeI
+  end
+
+  subgraph P6[Phase 6: Continuous Monitoring and Adjustment]
+    NodeJ --> NodeK[Monitor Fleet Performance\nUber H3, DoorDash Autonomous Delivery Platform]
+    NodeK --> DecF{Fleet performance within tolerance?}
+    DecF -- Yes --> NodeL[Adjust Routing Algorithms\nUber Michelangelo, DoorDash Autonomous Delivery Platform]
+    DecF -- No --> NodeK
+  end
+
+  style Start fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style Hold1 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style End fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style DecA fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecB fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecC fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecD fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecE fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecF fill:#10b3c6,color:#fff,stroke:#10b3c6

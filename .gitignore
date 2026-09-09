@@ -2,3 +2,4 @@ data/processes.json
 data/*.xlsx
 data/raw/
 .DS_Store
+data/logs/

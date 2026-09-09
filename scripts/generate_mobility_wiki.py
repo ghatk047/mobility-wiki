@@ -15,6 +15,8 @@ Flags
   --no-verify     skip the live-page verification wait
   --bootstrap     push shell only (.nojekyll, css, js, indexes) and exit
   --rebuild-nav   regenerate and push every index, no model calls
+  -j, --parallel N  run N processes concurrently (default 1)
+  --dry-run       list what would run, generate nothing
 
 Secrets come from the environment only, never from a file:
     export GITHUB_TOKEN=$(gh auth token)
@@ -27,8 +29,10 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import time
 from base64 import b64encode
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
@@ -1296,8 +1300,17 @@ def load_tracker():
     return {}
 
 
+# One lock guards the tracker dict and its file. With --parallel several worker
+# threads finish at once, and an unguarded read-modify-write would lose entries
+# or leave truncated JSON on disk.
+TRACKER_LOCK = threading.Lock()
+
+
 def save_tracker(tr):
-    TRACKER.write_text(json.dumps(tr, indent=2), encoding="utf-8")
+    """Atomic write: a crash mid-write must not leave an unparseable tracker."""
+    tmp = TRACKER.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(tr, indent=2), encoding="utf-8")
+    tmp.replace(TRACKER)
 
 
 def is_complete(pid, tr):
@@ -1305,12 +1318,14 @@ def is_complete(pid, tr):
 
 
 def mark_complete(pid, tr, url, validation=None):
-    tr[pid] = {"status": "Complete", "url": url,
-               "template_version": TEMPLATE_VERSION,
-               "completed_at": datetime.now().isoformat(timespec="seconds")}
+    entry = {"status": "Complete", "url": url,
+             "template_version": TEMPLATE_VERSION,
+             "completed_at": datetime.now().isoformat(timespec="seconds")}
     if validation:
-        tr[pid]["validation"] = validation
-    save_tracker(tr)
+        entry["validation"] = validation
+    with TRACKER_LOCK:
+        tr[pid] = entry
+        save_tracker(tr)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1722,8 +1737,8 @@ def rebuild_nav(tr, deploy=True):
         push_deploy()
 
 
-def process_one(proc, tr):
-    log(f"── {proc['pid']} — {proc['name']}  [backend: {backend_for(proc['l1'])}]")
+def process_one(proc, tr, tag=""):
+    log(f"──{tag} {proc['pid']} — {proc['name']}  [backend: {backend_for(proc['l1'])}]")
     data = generate_process_content(proc)
     if not data:
         log(f"{proc['pid']}: no usable content JSON — skipped", "ERROR")
@@ -1778,7 +1793,15 @@ def main():
     ap.add_argument("--no-verify", action="store_true")
     ap.add_argument("--bootstrap", action="store_true")
     ap.add_argument("--rebuild-nav", action="store_true")
+    ap.add_argument("-j", "--parallel", type=int, default=1, metavar="N",
+                    help="run N processes concurrently (default 1). Each worker "
+                         "holds an Ollama request and spawns its own headless "
+                         "Chrome for mmdc, so N is bounded by RAM, not CPU.")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="list what would be generated, then exit")
     args = ap.parse_args()
+    if args.parallel < 1:
+        sys.exit("--parallel must be at least 1")
 
     for d in (DATA_DIR, DIAGRAM_DIR, IMG_DIR):
         d.mkdir(parents=True, exist_ok=True)
@@ -1795,16 +1818,54 @@ def main():
         return
 
     targets = select_targets(args, tr)
-    log(f"{len(targets)} process(es) selected")
+    remaining = sum(1 for p in PROCESSES if not is_complete(p["pid"], tr))
+    log(f"{len(targets)} process(es) selected "
+        f"({remaining} of {len(PROCESSES)} still incomplete overall)")
+
+    if args.dry_run:
+        for i, p in enumerate(targets, 1):
+            log(f"  {i:>3}. {p['pid']}  {p['name'][:64]}")
+        log(f"dry run — nothing generated, nothing pushed ({len(targets)} would run, "
+            f"parallel={args.parallel})")
+        return
+    if not targets:
+        log("nothing to do — everything selected is already Complete "
+            "(use --force to regenerate)")
+        return
+
     done, failed = [], []
+    started = time.time()
+    counter = {"n": 0}
+    count_lock = threading.Lock()
+
+    def run_one(proc):
+        with count_lock:
+            counter["n"] += 1
+            i = counter["n"]
+        tag = f" [{i}/{len(targets)}]"
+        try:
+            return proc["pid"], process_one(proc, tr, tag=tag)
+        except Exception as exc:                      # never let one kill the batch
+            log(f"{proc['pid']}: unhandled error — {exc}", "ERROR")
+            return proc["pid"], None
+
     try:
-        for proc in targets:
-            url = process_one(proc, tr)
-            (done if url else failed).append(proc["pid"])
+        if args.parallel > 1:
+            log(f"running {args.parallel} workers in parallel")
+            with ThreadPoolExecutor(max_workers=args.parallel) as pool:
+                for pid, url in pool.map(run_one, targets):
+                    (done if url else failed).append(pid)
+        else:
+            for proc in targets:
+                pid, url = run_one(proc)
+                (done if url else failed).append(pid)
     except KeyboardInterrupt:
         log("interrupted — publishing what is done", "WARN")
 
+    mins = (time.time() - started) / 60
     if done:
+        log(f"{len(done)} published in {mins:.1f} min "
+            f"({mins / max(len(done), 1):.1f} min each)")
         rebuild_nav(tr, deploy=False)
     push_deploy()
 
