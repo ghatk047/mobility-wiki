@@ -1,0 +1,87 @@
+{
+  "_meta": {
+    "purpose": "Real, publicly-sourced platforms and systems per archetype. Generators inject the relevant slice into prompts; validate_process() logs any system a page names that is not here.",
+    "researched_on": "2026-09-09",
+    "rule": "Only names with public sourcing appear here. Where a layer is genuinely undocumented it is recorded as a sparse_layer with evidence_gap text instead of an invented product name."
+  },
+  "systems": {
+    "ride-hail": [
+      {"name": "Uber Michelangelo", "vendor": "Uber (internal)", "capability": "ML platform — ~400 active ML projects, 5,000+ models in production, 10M real-time predictions/sec at peak", "sourcing": "solid", "source": "https://www.uber.com/us/en/blog/michelangelo-machine-learning-platform/"},
+      {"name": "Uber DeepETA", "vendor": "Uber (internal)", "capability": "ETA residual model — 100M+ parameters, trained on 1B+ trips, post-processes routing-engine estimates", "sourcing": "solid", "source": "https://www.uber.com/se/en/blog/deepeta-how-uber-predicts-arrival-times/"},
+      {"name": "Uber H3", "vendor": "Uber (open source)", "capability": "Hexagonal hierarchical geospatial index — driver-state sharding and supply/demand aggregation", "sourcing": "solid", "source": "https://h3geo.org/"},
+      {"name": "Michelangelo Online Prediction Service", "vendor": "Uber (internal)", "capability": "Low-latency model serving used by ETA, matching, fraud and Eats ranking", "sourcing": "solid", "source": "https://www.uber.com/us/en/blog/machine-learning/"},
+      {"name": "Hot-index updater / map-matching service", "vendor": "Uber (internal)", "capability": "Consumes location events, map-snaps points, converts to H3 cell, writes DriverState and cell membership", "sourcing": "partial", "source": "https://dev.to/madhur_banger/architecting-an-uber-scale-real-time-tracking-dispatch-system-3a72"},
+      {"name": "Checkr", "vendor": "Checkr, Inc.", "capability": "Background check API — MVR and criminal screening for gig platforms", "sourcing": "solid"},
+      {"name": "Stripe Connect", "vendor": "Stripe", "capability": "Marketplace payments and split payouts", "sourcing": "solid"},
+      {"name": "Braintree", "vendor": "PayPal", "capability": "Card processing and stored payment credentials", "sourcing": "solid"},
+      {"name": "Twilio", "vendor": "Twilio Inc.", "capability": "Masked-number voice/SMS between rider and driver", "sourcing": "solid"},
+      {"name": "OpenStreetMap", "vendor": "OSM Foundation", "capability": "Base map data underlying multiple mobility routing stacks", "sourcing": "solid"},
+      {"name": "Google Maps Platform", "vendor": "Google", "capability": "Geocoding, routing and traffic feeds licensed by mobility platforms", "sourcing": "solid"}
+    ],
+    "autonomous-ride-hail": [
+      {"name": "Carcraft", "vendor": "Waymo (internal)", "capability": "Simulation replay and scenario engine — ~25,000 virtual vehicles in modelled Austin, Mountain View and Phoenix plus test-track scenarios", "sourcing": "solid", "source": "https://9to5google.com/2017/08/23/waymo-self-driving-carcraft-software-castle-testing/"},
+      {"name": "Simulation City", "vendor": "Waymo (internal)", "capability": "Higher-fidelity successor to Carcraft — models rain on road surfaces and low-sun illumination", "sourcing": "solid", "source": "https://waymo.com/blog/2021/07/simulation-city/"},
+      {"name": "Castle", "vendor": "Waymo (internal)", "capability": "Reconfigurable closed-course test facility", "sourcing": "solid", "source": "https://9to5google.com/2017/08/23/waymo-self-driving-carcraft-software-castle-testing/"},
+      {"name": "CA DMV Autonomous Vehicle Disengagement Report", "vendor": "California DMV", "capability": "Mandatory annual disengagement and collision reporting for AV permit holders", "sourcing": "solid"},
+      {"name": "Zeekr platform", "vendor": "Geely / Zeekr", "capability": "Next-generation Waymo vehicle platform supporting fleet expansion beyond ~2,500 vehicles", "sourcing": "solid"}
+    ],
+    "last-mile-delivery": [
+      {"name": "DoorDash Dot", "vendor": "DoorDash Labs (in-house)", "capability": "Autonomous delivery robot — up to 20 mph, operates in bike lanes, roads and sidewalks", "sourcing": "solid", "source": "https://about.doordash.com/en-us/news/doordash-unveils-dot"},
+      {"name": "DoorDash Autonomous Delivery Platform", "vendor": "DoorDash (internal)", "capability": "Orchestration layer routing orders across couriers, robots and drones", "sourcing": "partial", "source": "https://about.doordash.com/en-us/news/doordash-unveils-dot"},
+      {"name": "DoorDash Air", "vendor": "DoorDash", "capability": "In-house drone delivery operation under its own FAA Part 135 air carrier certificate", "sourcing": "solid", "source": "https://www.thedronegirl.com/2026/07/30/drone-delivery-news-july-2026/"},
+      {"name": "Serve Robotics", "vendor": "Serve Robotics Inc.", "capability": "Third-party sidewalk delivery robots integrated into the DoorDash marketplace", "sourcing": "solid"},
+      {"name": "Deliveroo platform", "vendor": "Deliveroo (DoorDash, acquired Oct 2)", "capability": "European delivery marketplace and rider dispatch, now under DoorDash ownership", "sourcing": "solid"},
+      {"name": "Olo", "vendor": "Olo Inc.", "capability": "Restaurant digital ordering middleware and menu syndication", "sourcing": "solid"},
+      {"name": "Toast POS", "vendor": "Toast, Inc.", "capability": "Restaurant point of sale with delivery-marketplace order injection", "sourcing": "solid"},
+      {"name": "Square POS", "vendor": "Block, Inc.", "capability": "Merchant point of sale and menu/catalogue source of truth", "sourcing": "solid"}
+    ],
+    "micromobility": [
+      {"name": "Mobility Data Specification (MDS)", "vendor": "Open Mobility Foundation", "capability": "City-facing API set for right-of-way management — Provider, Agency and Policy APIs; MDS 2.0 released", "sourcing": "solid", "source": "https://www.openmobilityfoundation.org/announcing-mobility-data-specification-version-2-0-release-candidate/"},
+      {"name": "GBFS (General Bikeshare Feed Specification)", "vendor": "MobilityData", "capability": "Public real-time vehicle availability feed — mandatory alongside MDS for micromobility and carshare modes", "sourcing": "solid", "source": "https://joyride.city/blog/mds-gbfs-micromobility-business/"},
+      {"name": "Populus Mobility Manager", "vendor": "Populus AI", "capability": "City-side ingestion of real-time and historic MDS data; digital policy communication to operators for compliance", "sourcing": "solid", "source": "https://www.populus.ai/products/mobility-manager"},
+      {"name": "Ride Report", "vendor": "Ride Report", "capability": "City micromobility permit compliance, fleet-cap monitoring and reporting; MDS Working Group steering committee", "sourcing": "solid"},
+      {"name": "Lacuna", "vendor": "Lacuna Technologies", "capability": "Digital right-of-way and curb policy enforcement; MDS Working Group steering committee", "sourcing": "solid"},
+      {"name": "Blue Systems", "vendor": "Blue Systems", "capability": "Urban mobility data platform; MDS Working Group steering committee", "sourcing": "solid"},
+      {"name": "Joyride Fleet Management Dashboard", "vendor": "Joyride", "capability": "Operator-side fleet control, IoT vehicle state and MDS/GBFS feed generation", "sourcing": "solid", "source": "https://joyride.city/fleet-management-dashboard/"},
+      {"name": "Bolt in-house e-bike platform", "vendor": "Bolt Technology OÜ", "capability": "Vertically-integrated vehicle design; simplified internals delivering 15%+ durability improvement", "sourcing": "solid"},
+      {"name": "Bolt AI-equipped e-scooter", "vendor": "Bolt Technology OÜ", "capability": "On-vehicle AI for compliant-riding detection — sidewalk riding, tandem riding, parking; phased rollout DE/BE/CH", "sourcing": "solid", "source": "https://zagdaily.com/featured/bolt-launches-ai-equipped-e-scooter-to-boost-compliant-riding/"}
+    ],
+    "evtol": [
+      {"name": "FAA Type Certification Process (5 stages)", "vendor": "FAA", "capability": "Stages 1-5; Stage 4 shifts scrutiny from design documentation to physical hardware conformity", "sourcing": "solid"},
+      {"name": "Type Inspection Authorization (TIA)", "vendor": "FAA", "capability": "Authorises FAA pilots to conduct certification flight testing on a conforming aircraft", "sourcing": "solid"},
+      {"name": "FAA UAM ConOps 2.0", "vendor": "FAA", "capability": "Concept of operations defining UAM Corridors, the PSU role and the phased maturity model", "sourcing": "solid", "source": "https://www.faa.gov/sites/faa.gov/files/Urban-Air-Mobility-Concept-of-Operations-2.0.pdf"},
+      {"name": "Provider of Services for UAM (PSU)", "vendor": "FAA-defined role", "capability": "Primary service and data provider for UAM stakeholders; interface between the UAM ecosystem and the FAA. Supports operations planning, flight intent sharing, strategic and tactical deconfliction, airspace management and off-nominal support", "sourcing": "solid", "source": "https://www.faa.gov/sites/faa.gov/files/Urban-Air-Mobility-Concept-of-Operations-2.0.pdf"},
+      {"name": "eVTOL Integration Pilot Program (eIPP)", "vendor": "White House / FAA", "capability": "US city deployment programme Archer is participating in", "sourcing": "solid"},
+      {"name": "UAE GCAA Restricted Type Certificate (RTC) programme", "vendor": "UAE General Civil Aviation Authority", "capability": "Streamlined certification path for Archer Midnight entry into service in the UAE", "sourcing": "solid"},
+      {"name": "Skyports Infrastructure", "vendor": "Skyports", "capability": "Vertiport design, development and operation", "sourcing": "partial"}
+    ],
+    "drone-delivery": [
+      {"name": "FAA Part 107", "vendor": "FAA", "capability": "Small UAS rule — the current operating framework, requiring waivers for BVLOS", "sourcing": "solid"},
+      {"name": "FAA Part 108 (PROPOSED — NOT IN FORCE)", "vendor": "FAA", "capability": "Proposed BVLOS rule replacing the Part 107 waiver system. Covers operations up to 1,320 lb with two approval levels (Permitted Operations, Operational Certificate) and five risk categories by population density", "sourcing": "solid", "status_caveat": "NPRM ONLY as of 29 Aug 2026. Published 7 Aug 2025; comments closed 6 Oct 2025 with 3,000+ responses; reopened 28 Jan - 11 Feb 2026 for right-of-way and electronic conspicuity. Held in OIRA review since 10 Jul 2026. Final rule likely late 2026 into 2027. NO operator can claim Part 108 authority today.", "source": "https://uavhq.com/blog/faa-part-108-complete-guide-bvlos-2026/"},
+      {"name": "FAA Part 135", "vendor": "FAA", "capability": "Air carrier certificate — the framework Amazon Prime Air, DoorDash Air and Archer operate under", "sourcing": "solid"},
+      {"name": "ASTM F3548-21", "vendor": "ASTM International", "capability": "UTM USS interoperability standard; safety case limited to strategic deconfliction via the Strategic Coordination role", "sourcing": "solid", "source": "https://store.astm.org/f3548-21.html"},
+      {"name": "Zipline Platform 2 (P2)", "vendor": "Zipline", "capability": "Hovers at ~300 ft and lowers orders on a tethered delivery droid; up to 8 lb payload, ~10-mile radius; in customer service since Jan 2025", "sourcing": "solid", "source": "https://dronexl.co/drone-companies/zipline/"},
+      {"name": "Amazon MK30", "vendor": "Amazon Prime Air", "capability": "Up to 5 lb payload, double the range and half the noise of predecessors; 30-minute delivery target", "sourcing": "solid"},
+      {"name": "UAS Service Supplier (USS)", "vendor": "FAA-defined role", "capability": "Provides UTM services including strategic deconfliction under ASTM F3548", "sourcing": "solid"}
+    ],
+    "shared-enterprise": [
+      {"name": "Workday HCM", "vendor": "Workday", "capability": "Corporate W2 HR, payroll and talent", "sourcing": "solid"},
+      {"name": "Salesforce", "vendor": "Salesforce", "capability": "Merchant, enterprise and municipal account management", "sourcing": "solid"},
+      {"name": "Snowflake", "vendor": "Snowflake", "capability": "Analytics warehouse for trip, order and fleet telemetry", "sourcing": "solid"},
+      {"name": "Databricks", "vendor": "Databricks", "capability": "Lakehouse and ML feature engineering", "sourcing": "solid"},
+      {"name": "Apache Kafka", "vendor": "Apache Software Foundation", "capability": "Event streaming backbone for location, trip and order events", "sourcing": "solid"},
+      {"name": "Kubernetes", "vendor": "CNCF", "capability": "Container orchestration underpinning platform services", "sourcing": "solid"},
+      {"name": "Ray", "vendor": "Anyscale / open source", "capability": "Distributed compute — Uber's Michelangelo modernisation runs Ray on Kubernetes", "sourcing": "solid"},
+      {"name": "NetSuite", "vendor": "Oracle", "capability": "Financial close and subledger for smaller operators", "sourcing": "partial"},
+      {"name": "Zendesk", "vendor": "Zendesk", "capability": "Support ticketing and contact handling", "sourcing": "solid"}
+    ]
+  },
+  "sparse_layers": [
+    {"archetype": "autonomous-ride-hail", "layer": "Production AV software stack (perception, prediction, planning, control)", "evidence_gap": "Waymo does not publish component names or architecture for its production driving stack. Only simulation and test infrastructure is publicly named.", "render": "dashed"},
+    {"archetype": "autonomous-ride-hail", "layer": "Remote assistance / fleet response tooling", "evidence_gap": "Waymo confirms remote assistance exists as a capability but publishes no product name, interface design or operator-to-vehicle ratio.", "render": "dashed"},
+    {"archetype": "evtol", "layer": "Flight operations and MRO software", "evidence_gap": "No eVTOL operator has entered commercial service, so no operational software estate is documented.", "render": "dashed"},
+    {"archetype": "evtol", "layer": "Vertiport scheduling and turnaround systems", "evidence_gap": "Vertiport operations exist as FAA concept-of-operations text, not as documented deployed systems.", "render": "dashed"},
+    {"archetype": "evtol", "layer": "Wisk autonomous ground supervision", "evidence_gap": "Wisk's ground-supervision concept of operations, supervisor-to-aircraft ratio and tooling are not published.", "render": "dashed"},
+    {"archetype": "drone-delivery", "layer": "Operator-internal fleet orchestration platforms", "evidence_gap": "Zipline, Wing and Prime Air publish aircraft and network facts but not internal dispatch/orchestration product names.", "render": "dashed"}
+  ]
+}

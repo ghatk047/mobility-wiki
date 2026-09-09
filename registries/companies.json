@@ -1,0 +1,193 @@
+{
+  "_meta": {
+    "purpose": "Verified 2026 operating status per archetype company. The local model has a training cutoff and cannot reach the internet; every fact here was confirmed by web research on 2026-09-09 and carries a source. Generators MUST prefer these facts over model recall.",
+    "researched_on": "2026-09-09",
+    "sourcing_scale": ["solid", "partial", "sparse"],
+    "sparse_rule": "An entity marked sparse has genuinely thin public sourcing. Do NOT invent specifics to fill the gap. EA diagram nodes for sparse entities render dashed with a 'limited public sourcing' note."
+  },
+  "companies": [
+    {
+      "key": "uber", "name": "Uber Technologies, Inc.", "archetype": "ride-hail",
+      "status_2026": "Operating normally, profitable and scaling.",
+      "sourcing": "solid",
+      "facts": [
+        "Q2 2026 gross bookings $58.0B, +24% YoY",
+        "Q2 2026 non-GAAP EPS +35% YoY; TTM free cash flow passed $10B for the first time",
+        "Partnership-led AV strategy: ~30 AV partners, targeting robotaxi availability in 15 cities by end of 2026"
+      ],
+      "sources": ["https://investor.uber.com/news-events/news/press-release-details/2026/Uber-Announces-Results-for-Second-Quarter-2026/default.aspx", "https://techcrunch.com/2026/08/01/ubers-autonomous-vehicle-deal-tracker/"]
+    },
+    {
+      "key": "lyft", "name": "Lyft, Inc.", "archetype": "ride-hail",
+      "status_2026": "Operating normally; smaller than Uber, revenue growing, EPS missing consensus.",
+      "sourcing": "solid",
+      "facts": [
+        "Q2 2026 revenue $1.84B, +16.1% YoY, beating consensus",
+        "Q2 2026 EPS $0.29, missing $0.39 consensus by 25.6%",
+        "AV strategy contrasts with Uber: stated willingness to purchase thousands of AVs outright; adding Waymo vehicles to the Lyft app"
+      ],
+      "sources": ["https://finance.yahoo.com/markets/stocks/articles/uber-lyft-player-better-placed-162000160.html", "https://www.pymnts.com/earnings/2026/uber-and-lyft-stopped-competing-and-started-thriving/"]
+    },
+    {
+      "key": "waymo", "name": "Waymo LLC", "archetype": "autonomous-ride-hail",
+      "status_2026": "Operating commercially and expanding, but freeway operations paused nationwide since 21 May 2026.",
+      "sourcing": "partial",
+      "facts": [
+        "14 US metropolitan areas as of 1 September 2026; Denver, San Diego and Tampa opened to paid driverless public service that day",
+        "Miami limited driverless 22 Jan 2026; Orlando 24 Feb 2026, public 15 Apr 2026; Nashville 7 Apr 2026 with a 60-square-mile geofence",
+        "~2,500 autonomous vehicles as of Nov 2025; expansion planned to 3,500+ with next-generation Zeekr platform",
+        "Nationwide pause of freeway operations 21 May 2026; freeway rides previously available in Phoenix, San Francisco and Los Angeles",
+        "IIHS benchmark 23 Jul 2026: 68% fewer police-reportable crashes per vehicle mile than human drivers in the same cities and years"
+      ],
+      "sparse_areas": ["production AV software stack", "internal perception/planning/prediction component names", "remote assistance tooling names", "teleoperation interface architecture"],
+      "sparse_note": "Waymo's production AV stack is trade secret. The ONLY publicly named internal systems are simulation and test infrastructure: Carcraft (simulation replay/scenario engine), Simulation City (higher-fidelity successor), and Castle (reconfigurable closed-course test facility). Do not name any other internal Waymo system.",
+      "sources": ["https://thechargeport.com/robotaxi-tracker", "https://waymo.com/blog/2021/07/simulation-city/", "https://9to5google.com/2017/08/23/waymo-self-driving-carcraft-software-castle-testing/"]
+    },
+    {
+      "key": "doordash", "name": "DoorDash, Inc.", "archetype": "last-mile-delivery",
+      "status_2026": "Operating normally and expanding by acquisition and into autonomy AND aviation.",
+      "sourcing": "solid",
+      "facts": [
+        "Completed acquisition of Deliveroo following court approval, effective 2 October",
+        "Launched Dot, an in-house autonomous delivery robot from DoorDash Labs, up to 20 mph across bike lanes, roads and sidewalks; early access around Phoenix",
+        "Partners with Serve Robotics for sidewalk autonomous delivery, and with Wing for drone delivery (tens of thousands of deliveries completed)",
+        "Launched DoorDash Air after earning its own FAA Part 135 air carrier certificate, becoming the eighth US drone operator to do so"
+      ],
+      "cross_archetype_note": "DoorDash holds a Part 135 certificate itself. The boundary between 'delivery marketplace' and 'drone operator' is not clean in 2026; LM and DD domains legitimately overlap for this company.",
+      "sources": ["https://about.doordash.com/en-us/news/doordash-unveils-dot", "https://www.thedronegirl.com/2026/07/30/drone-delivery-news-july-2026/"]
+    },
+    {
+      "key": "bird", "name": "Bird (brand of Third Lane Mobility, Inc.)", "archetype": "micromobility",
+      "status_2026": "NOT an independent going concern. Restructured post-bankruptcy; operates as a brand under a new parent.",
+      "sourcing": "solid",
+      "facts": [
+        "Filed Chapter 11 in December 2023, two years after a SPAC listing that valued it at ~$2.3B",
+        "Avoided liquidation; reorganised in 2024 under new parent Third Lane Mobility Inc., which also holds the Spin brand",
+        "Liquidating plan confirmed 2 Aug 2024, effective 17 Sep 2024; as of Feb 2026 the Tort Claims Trustee reported 101 of 221 asserted tort claims resolved",
+        "Post-restructuring model is deliberately regulator-friendly with capped fleet sizes to avoid prior over-expansion",
+        "Bird and Spin together operate in ~350 cities across Canada, the US, Europe and the Middle East"
+      ],
+      "modelling_note": "Bird is the POST-RESTRUCTURING, permit-constrained micromobility archetype. Do not model it as a growth-stage scale-up. Its distinguishing processes are fleet-cap compliance, permit retention and unit-economics discipline.",
+      "sources": ["https://www.smartcitiesdive.com/news/bird-micromobility-operator-reorganizes-third-lane-mobility-chapter-11-bankruptcy/712525/", "https://elevenflo.com/blog/bird-global-bankruptcy-liquidating-plan"]
+    },
+    {
+      "key": "lime", "name": "Lime (Neutron Holdings, Inc.)", "archetype": "micromobility",
+      "status_2026": "Newly public, operationally profitable, but carrying a disclosed going-concern warning.",
+      "sourcing": "solid",
+      "facts": [
+        "Filed for IPO 7 May 2026; completed Nasdaq Global Select Market IPO in July 2026 under ticker LIME",
+        "FY2025 revenue $886.7M, +29% YoY; operating income swung from a $24.6M loss in 2023 to $70.4M profit in 2025",
+        "Q1 2026 revenue $170.2M (+32% from $129.0M); Q2 2026 revenue $304M (+24% YoY)",
+        "2025 average operational fleet 325,137 vehicles; Revenue per Vehicle per Day (RVD) $7.47; ~230 cities across 29 countries",
+        "2025 operational fleet retention rate 116% (won more fleet capacity in existing cities than it lost elsewhere)",
+        "S-1 disclosed substantial doubt about ability to continue as a going concern absent IPO proceeds to service debt"
+      ],
+      "sources": ["https://techcrunch.com/2026/05/08/lime-the-uber-backed-micromobility-company-files-for-ipo/", "https://micromobility.io/news/886m-230-cities-and-an-ipo-filing---inside-limes-s-1", "https://www.karmactive.com/lime-posts-295m-profit-304m-revenue-174m-ipo-amid-rising-costs/"]
+    },
+    {
+      "key": "bolt", "name": "Bolt Technology OÜ", "archetype": "micromobility",
+      "status_2026": "Operating normally; largest European scooter operator by city count. Also a ride-hail platform.",
+      "sourcing": "solid",
+      "facts": [
+        "Over 230,000 scooters and e-bikes across more than 270 European cities",
+        "Launched its first fully in-house e-bike in January 2026",
+        "Rolling out AI-equipped e-scooters for compliant-riding enforcement, first phase in Germany, Belgium and Switzerland (April 2026)",
+        "Milan licence for scooters, e-bikes and cargo bikes running to 2026: ~2,000 scooters, 2,000 e-bikes, 15 cargo bikes",
+        "Liverpool City Council contract from early 2026 — first UK scooter launch — 2,000 scooters and 100 e-bikes",
+        "Reports at least 15% durability improvement in regular operations from simplified internal components"
+      ],
+      "modelling_note": "Bolt is the healthy, vertically-integrated micromobility archetype (designs its own hardware) and simultaneously a ride-hail marketplace. It is the best archetype for MF processes that assume a going concern.",
+      "sources": ["https://zagdaily.com/micromobility/european-e-scooter-snapshot-bolt-number-one-operator-by-city-launches/", "https://zagdaily.com/featured/bolt-launches-ai-equipped-e-scooter-to-boost-compliant-riding/", "https://liverpoolexpress.co.uk/bolt-makes-liverpool-the-home-of-first-uk-scooter-launch/"]
+    },
+    {
+      "key": "joby", "name": "Joby Aviation, Inc.", "archetype": "evtol",
+      "status_2026": "PRE-REVENUE, pre-certification. Furthest along of the US eVTOL field.",
+      "sourcing": "partial",
+      "facts": [
+        "Cleared Stage 4 of the FAA type certification process in late March 2026 — scrutiny shifts from design documentation to physical hardware",
+        "Began flight testing its first FAA-conforming aircraft for Type Inspection Authorization (TIA) in March 2026",
+        "FAA pilots expected at the Marina, CA facility to conduct TIA testing",
+        "Type certificate anticipated late 2026 by management; independent analysts place realistic entry into service mid-to-late 2027",
+        "Commercial launch additionally requires FAA air carrier certification of Joby's operating entity, vertiport operational readiness in at least one market, and sufficient aircraft production"
+      ],
+      "sparse_areas": ["internal flight-ops software", "maintenance/MRO system names", "vertiport scheduling platform names", "operational KPI baselines"],
+      "sparse_note": "No commercial service has ever operated, so there is no operational literature. Certification-stage facts are well sourced; day-to-day operating processes are necessarily forward-looking. Mark forward-looking steps as such.",
+      "sources": ["https://www.jobyaviation.com/news/joby-s-first-faa-conforming-aircraft-takes-flight", "https://www.aircraftinsider.com/joby-aviation-clears-faa-stage-4-certification-first-ever-commercial-evtol-certificate-now-within-reach/", "https://futurewatchlog.com/evtol-certification-tracker/"]
+    },
+    {
+      "key": "archer", "name": "Archer Aviation Inc.", "archetype": "evtol",
+      "status_2026": "PRE-REVENUE, pre-certification. Phase 3 of 4 in FAA type certification.",
+      "sourcing": "partial",
+      "facts": [
+        "Completed Phase 3 of 4 of the FAA Type Certification process for the Midnight eVTOL; first eVTOL manufacturer to reach this stage",
+        "FAA issued the newest Midnight aircraft a special airworthiness certificate; piloted VTOL campaign underway, progressing toward piloted transition flight",
+        "Preparing for potential early Midnight operations with partners in Florida, Texas and New York as soon as H2 2026",
+        "Participating in the White House eVTOL Integration Pilot Program (eIPP) for US city deployments",
+        "UAE GCAA transitioned Midnight into a Restricted Type Certificate (RTC) programme for entry into service in the UAE",
+        "Holds an FAA Part 135 air carrier certificate permitting it to operate a commercial airline"
+      ],
+      "sparse_areas": ["internal flight-ops software", "vertiport scheduling platform names", "operational KPI baselines"],
+      "sources": ["https://www.sec.gov/Archives/edgar/data/1824502/000182450226000017/archerlettertoshareholde.htm", "https://verticalmag.com/press-releases/archer-receives-faa-certification-to-begin-operating-commercial-airline/", "https://investors.archer.com/news/news-details/2026/UAE-Regulator-And-Archer-Move-To-Streamlined-Approach-for-Certifying-Midnight-in-the-UAE/default.aspx"]
+    },
+    {
+      "key": "wisk", "name": "Wisk Aero LLC (Boeing subsidiary)", "archetype": "evtol",
+      "status_2026": "MOST PRE-COMMERCIAL of the archetypes. Pre-revenue, autonomous, certification targeted 'before the end of the decade'.",
+      "sourcing": "sparse",
+      "facts": [
+        "Generation 6 completed its maiden flight 16 December 2025 at 12:26 PST from the Hollister, CA flight test facility",
+        "Second Gen 6 aircraft flew 4 May 2026, putting two Boeing-backed certification aircraft into simultaneous flight test",
+        "Gen 6 is the first-ever candidate for FAA type certification of an autonomous, passenger-carrying eVTOL in the United States",
+        "Four passengers; operated with human oversight from the ground rather than an onboard pilot",
+        "Launch markets identified as Houston, Los Angeles and Miami",
+        "Plans to certify before the end of the decade — materially later than Joby or Archer"
+      ],
+      "sparse_areas": ["all operational processes", "ground supervisor tooling", "multi-vehicle supervision ratios", "vertiport integration", "internal system names", "KPI baselines"],
+      "sparse_note": "Wisk is the sparsest entity in this wiki. It has never carried a paying passenger, its autonomy stack is not public, and its ground-supervision concept of operations is not published in operational detail. Almost all Wisk-specific processes are forward-looking. Render Wisk EA nodes dashed.",
+      "sources": ["https://wisk.aero/newsroom/wisk-completes-first-flight-of-generation-6-autonomous-evtol", "https://dronexl.co/2026/05/04/wisk-aero-gen-6-autonomous-evtol-flight/", "https://aviationweek.com/aerospace/advanced-air-mobility/wisk-completes-first-flight-gen-6-autonomous-evtol"]
+    },
+    {
+      "key": "zipline", "name": "Zipline International Inc.", "archetype": "drone-delivery",
+      "status_2026": "Operating commercially at the largest scale in autonomous delivery. Well funded.",
+      "sourcing": "solid",
+      "facts": [
+        "Passed 2 million cumulative deliveries in January 2026 (1 million reached in 2024); world's largest autonomous delivery operator",
+        "US deliveries growing ~15% week-over-week for the seven months preceding January 2026",
+        "Raised $600M in January 2026 and a further $200M in March 2026",
+        "Platform 2 in customer service since January 2025: hovers at ~300 feet and lowers orders on a tethered droid; up to 8 lb payload, ~10-mile radius",
+        "P2 launched in Pea Ridge, Arkansas and the Dallas-Fort Worth Metroplex; Seattle announced",
+        "Walmart partnership across 17 DFW locations, offering drone delivery to up to 75% of the DFW population",
+        "Restaurant partners include Panera, Chipotle, Crumbl, Blaze Pizza, Wendy's and Little Caesars"
+      ],
+      "sources": ["https://techcrunch.com/2026/01/21/zipline-charts-drone-delivery-expansion-with-600m-in-new-funding/", "https://techcrunch.com/2026/03/23/zipline-snaps-up-another-200m-to-fuel-its-drone-delivery-expansion/", "https://dronexl.co/drone-companies/zipline/"]
+    },
+    {
+      "key": "wing", "name": "Wing Aviation LLC (Alphabet)", "archetype": "drone-delivery",
+      "status_2026": "Operating commercially and in the largest announced retail expansion in the sector.",
+      "sourcing": "solid",
+      "facts": [
+        "Expanding Walmart drone delivery to an additional 150 stores in 2026 — described as the world's largest drone delivery expansion",
+        "Walmart/Wing target: 270 US locations by end of 2027, reaching more than 40 million Americans",
+        "Seven new metros announced: Memphis, New Orleans, Philadelphia, Phoenix, San Diego, San Francisco Bay Area, Salt Lake City",
+        "Existing operations in Texas and the Atlanta metro area",
+        "Partnership has completed more than one million commercial drone deliveries",
+        "Also partners with DoorDash, completing tens of thousands of deliveries"
+      ],
+      "sources": ["https://techcrunch.com/2026/01/11/wing-to-expand-drone-delivery-to-another-150-walmart-stores/", "https://www.cbsnews.com/news/walmart-drone-delivery-service-wing-150-stores/", "https://qz.com/walmart-wing-drone-delivery-expansion-seven-cities-061126"]
+    },
+    {
+      "key": "prime-air", "name": "Amazon Prime Air", "archetype": "drone-delivery",
+      "status_2026": "Operating commercially, mid-scale, in the middle of a sixfold footprint expansion.",
+      "sourcing": "solid",
+      "facts": [
+        "Currently operates from 11 locations across 10 US metropolitan areas (Arizona, Florida, Kansas, Louisiana, Michigan, Nebraska, Texas)",
+        "Expanding to nearly 500 US cities and towns by the end of 2026 — a sixfold increase in footprint",
+        "Near-term launches announced for Chicago, Syracuse, Cleveland, Atlanta and Boise",
+        "Completed hundreds of thousands of drone deliveries during 2026 to date",
+        "MK30 drone: up to 5 lb payload, double the range and half the noise of previous Amazon delivery drones; covers 60%+ of frequently purchased items",
+        "Delivery target as fast as 30 minutes",
+        "Operates under FAA Part 135 certification"
+      ],
+      "sources": ["https://www.aboutamazon.com/news/transportation/amazon-prime-air-drone-delivery-expansion", "https://www.freightwaves.com/news/amazon-drone-delivery-expansion-targets-500-cities-by-years-end", "https://dronelife.com/2026/08/19/amazon-prime-air-plans-drone-delivery-expansion-to-nearly-500-u-s-cities-and-towns/"]
+    }
+  ]
+}

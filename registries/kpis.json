@@ -1,0 +1,76 @@
+{
+  "_meta": {"purpose": "Real KPI patterns per L1 domain. Generators inject the domain slice so KPIs are grounded rather than invented. Values marked measured are sourced; values marked pattern are the industry metric NAME with no fabricated target.", "researched_on": "2026-09-09"},
+  "kpis": {
+    "MD": [
+      {"name": "Match time (request to driver assignment)", "unit": "seconds", "type": "pattern"},
+      {"name": "ETA accuracy / absolute ETA error", "unit": "seconds or %", "type": "pattern", "note": "Uber DeepETA predicts the residual between routing estimate and actual"},
+      {"name": "Driver acceptance rate", "unit": "%", "type": "pattern"},
+      {"name": "Unfulfilled request rate / cancellation rate", "unit": "%", "type": "pattern"},
+      {"name": "Pickup ETA vs actual", "unit": "minutes", "type": "pattern"},
+      {"name": "Utilisation (paid time / on-app time)", "unit": "%", "type": "pattern"},
+      {"name": "Real-time prediction throughput", "unit": "predictions/sec", "type": "measured", "value": "10M/sec at peak across Uber Michelangelo", "source": "uber michelangelo"}
+    ],
+    "PX": [{"name": "Surge multiplier distribution", "unit": "x", "type": "pattern"}, {"name": "Incentive cost per incremental trip", "unit": "currency", "type": "pattern"}, {"name": "Promotion redemption rate", "unit": "%", "type": "pattern"}, {"name": "Take rate", "unit": "%", "type": "pattern"}, {"name": "Subscription attach and churn rate", "unit": "%", "type": "pattern"}],
+    "SL": [{"name": "Onboarding funnel conversion (signup to first trip)", "unit": "%", "type": "pattern"}, {"name": "Time to activation", "unit": "days", "type": "pattern"}, {"name": "Background check turnaround", "unit": "hours", "type": "pattern"}, {"name": "Deactivation appeal overturn rate", "unit": "%", "type": "pattern"}, {"name": "Driver 90-day retention", "unit": "%", "type": "pattern"}, {"name": "Prop 22 earnings guarantee compliance", "unit": "%", "type": "measured", "value": "120% of CA minimum wage ($16.90/hr from 1 Jan 2026) for engaged time"}],
+    "TS": [{"name": "Safety incident rate per 100k trips", "unit": "rate", "type": "pattern"}, {"name": "Incident response time to first contact", "unit": "minutes", "type": "pattern"}, {"name": "Insurance loss ratio", "unit": "%", "type": "pattern"}, {"name": "Claim cycle time", "unit": "days", "type": "pattern"}, {"name": "Fraudulent account detection precision/recall", "unit": "%", "type": "pattern"}],
+    "PF": [{"name": "Payment authorisation success rate", "unit": "%", "type": "pattern"}, {"name": "Payout on-time rate", "unit": "%", "type": "pattern"}, {"name": "Chargeback rate", "unit": "%", "type": "pattern"}, {"name": "Days to close", "unit": "days", "type": "pattern"}, {"name": "1099 filing accuracy", "unit": "%", "type": "pattern"}],
+    "CX": [{"name": "CSAT", "unit": "score", "type": "pattern"}, {"name": "First contact resolution", "unit": "%", "type": "pattern"}, {"name": "Contacts per 1,000 trips or orders", "unit": "rate", "type": "pattern"}, {"name": "WAV request fulfilment rate", "unit": "%", "type": "pattern"}],
+    "AV": [
+      {"name": "Disengagements per mile / per 1,000 miles", "unit": "rate", "type": "pattern", "note": "Reported annually to CA DMV under 13 CCR 227.46"},
+      {"name": "Police-reportable crash rate per vehicle mile vs human benchmark", "unit": "%", "type": "measured", "value": "Waymo rider-only 68% fewer than human drivers in the same cities and years", "source": "IIHS benchmark 23 Jul 2026"},
+      {"name": "Remote assistance events per 1,000 miles", "unit": "rate", "type": "pattern"},
+      {"name": "Rider-only mile share", "unit": "%", "type": "pattern"},
+      {"name": "Fleet availability / vehicles in revenue service", "unit": "count", "type": "measured", "value": "~2,500 Waymo AVs as of Nov 2025, expanding toward 3,500+"},
+      {"name": "Geofence coverage area", "unit": "sq miles", "type": "measured", "value": "Nashville launched at a 60-square-mile service area"},
+      {"name": "Metros in paid driverless service", "unit": "count", "type": "measured", "value": "14 US metros as of 1 Sep 2026"}
+    ],
+    "MF": [
+      {"name": "Revenue per vehicle per day (RVD)", "unit": "currency", "type": "measured", "value": "Lime $7.47 in 2025", "source": "Lime S-1"},
+      {"name": "Average operational fleet", "unit": "vehicles", "type": "measured", "value": "Lime 325,137 (2025); Bolt 230,000+ scooters and e-bikes"},
+      {"name": "Operational fleet retention rate", "unit": "%", "type": "measured", "value": "Lime 116% in 2025 — won more fleet capacity in existing cities than lost elsewhere"},
+      {"name": "Vehicle utilisation (rides per vehicle per day)", "unit": "rate", "type": "pattern"},
+      {"name": "Redistribution / rebalancing cost per vehicle per day", "unit": "currency", "type": "pattern"},
+      {"name": "Battery swap cycle time", "unit": "minutes", "type": "pattern"},
+      {"name": "Vehicle uptime / out-of-service rate", "unit": "%", "type": "pattern"},
+      {"name": "Improper parking reports per 1,000 rides", "unit": "rate", "type": "pattern"},
+      {"name": "MDS feed availability and latency vs permit SLA", "unit": "% / seconds", "type": "pattern"},
+      {"name": "Vehicle durability improvement", "unit": "%", "type": "measured", "value": "Bolt reports at least 15% improvement from simplified internals"},
+      {"name": "Cities in operation", "unit": "count", "type": "measured", "value": "Lime ~230 across 29 countries; Bolt 270+; Bird+Spin ~350"}
+    ],
+    "LM": [
+      {"name": "Delivery time (order to doorstep)", "unit": "minutes", "type": "pattern"},
+      {"name": "On-time delivery rate", "unit": "%", "type": "pattern"},
+      {"name": "Courier acceptance rate", "unit": "%", "type": "pattern"},
+      {"name": "Order accuracy / missing item rate", "unit": "%", "type": "pattern"},
+      {"name": "Merchant menu sync freshness", "unit": "minutes", "type": "pattern"},
+      {"name": "Batching rate (multi-order deliveries)", "unit": "%", "type": "pattern"},
+      {"name": "Autonomous delivery share", "unit": "%", "type": "pattern", "note": "DoorDash Dot operates up to 20 mph across bike lanes, roads and sidewalks"}
+    ],
+    "AM": [
+      {"name": "Type certification stage progress", "unit": "stage", "type": "measured", "value": "Joby cleared Stage 4 of 5 (late Mar 2026); Archer completed Phase 3 of 4"},
+      {"name": "Vertiport turnaround time", "unit": "minutes", "type": "pattern", "note": "NO published operational baseline exists — no eVTOL operator has entered commercial service"},
+      {"name": "Conforming aircraft in flight test", "unit": "count", "type": "measured", "value": "Wisk had two Gen 6 aircraft in simultaneous flight test as of 4 May 2026"},
+      {"name": "Strategic deconfliction conflict rate", "unit": "rate", "type": "pattern", "note": "Per ASTM F3548 Strategic Coordination role"},
+      {"name": "Dispatch reliability / on-time departure", "unit": "%", "type": "pattern"},
+      {"name": "Passenger seats per aircraft", "unit": "count", "type": "measured", "value": "Wisk Gen 6 carries up to four passengers"}
+    ],
+    "DD": [
+      {"name": "Cumulative deliveries", "unit": "count", "type": "measured", "value": "Zipline passed 2M in Jan 2026; Wing+Walmart passed 1M; Prime Air hundreds of thousands during 2026"},
+      {"name": "Delivery time", "unit": "minutes", "type": "measured", "value": "Amazon Prime Air targets as fast as 30 minutes"},
+      {"name": "Payload capacity", "unit": "lb", "type": "measured", "value": "Zipline P2 up to 8 lb; Amazon MK30 up to 5 lb"},
+      {"name": "Service radius", "unit": "miles", "type": "measured", "value": "Zipline P2 ~10 miles"},
+      {"name": "Delivery growth rate", "unit": "%", "type": "measured", "value": "Zipline US deliveries ~15% week-over-week for seven months to Jan 2026"},
+      {"name": "Population coverage", "unit": "%", "type": "measured", "value": "Walmart/Zipline offering drone delivery to up to 75% of the DFW population"},
+      {"name": "Sites / stores in service", "unit": "count", "type": "measured", "value": "Prime Air 11 sites in 10 metros, expanding to ~500 cities by end-2026; Wing+Walmart targeting 270 locations by end-2027"},
+      {"name": "BVLOS waiver approval cycle time", "unit": "days", "type": "pattern"},
+      {"name": "Aborted delivery / return-to-nest rate", "unit": "%", "type": "pattern"}
+    ],
+    "VA": [{"name": "Fleet availability", "unit": "%", "type": "pattern"}, {"name": "Mean time between failures", "unit": "hours", "type": "pattern"}, {"name": "Maintenance cost per vehicle per month", "unit": "currency", "type": "pattern"}, {"name": "Asset useful life", "unit": "months", "type": "pattern"}, {"name": "Residual value at disposal", "unit": "%", "type": "pattern"}],
+    "RC": [{"name": "Permit retention rate", "unit": "%", "type": "pattern"}, {"name": "Regulatory reporting on-time rate", "unit": "%", "type": "pattern"}, {"name": "Fleet cap compliance", "unit": "%", "type": "pattern"}, {"name": "Data subject request turnaround", "unit": "days", "type": "pattern"}, {"name": "Cities with active operating authority", "unit": "count", "type": "pattern"}],
+    "TD": [{"name": "Map freshness / change detection latency", "unit": "hours", "type": "pattern"}, {"name": "Model training to production cycle time", "unit": "days", "type": "pattern"}, {"name": "Models in production", "unit": "count", "type": "measured", "value": "Uber Michelangelo: ~400 active ML projects, 5,000+ models"}, {"name": "Service availability", "unit": "%", "type": "pattern"}, {"name": "p99 request latency", "unit": "ms", "type": "pattern"}, {"name": "IoT device connectivity rate", "unit": "%", "type": "pattern"}],
+    "GM": [{"name": "Customer acquisition cost", "unit": "currency", "type": "pattern"}, {"name": "Blended CAC payback", "unit": "months", "type": "pattern"}, {"name": "Monthly active platform consumers", "unit": "count", "type": "pattern"}, {"name": "City launch time to breakeven", "unit": "months", "type": "pattern"}],
+    "FN": [{"name": "Gross bookings", "unit": "currency", "type": "measured", "value": "Uber Q2 2026 $58.0B, +24% YoY"}, {"name": "Revenue growth", "unit": "%", "type": "measured", "value": "Lyft Q2 2026 revenue $1.84B, +16.1%; Lime Q2 2026 $304M, +24%"}, {"name": "Free cash flow", "unit": "currency", "type": "measured", "value": "Uber TTM FCF passed $10B for the first time"}, {"name": "Contribution margin per trip", "unit": "%", "type": "pattern"}, {"name": "Operating income", "unit": "currency", "type": "measured", "value": "Lime swung from -$24.6M (2023) to +$70.4M (2025)"}],
+    "HR": [{"name": "Time to hire", "unit": "days", "type": "pattern"}, {"name": "Regretted attrition", "unit": "%", "type": "pattern"}, {"name": "Offer acceptance rate", "unit": "%", "type": "pattern"}, {"name": "Engagement score", "unit": "score", "type": "pattern"}],
+    "SE": [{"name": "Fleet electrification share", "unit": "%", "type": "pattern"}, {"name": "Scope 1/2/3 emissions", "unit": "tCO2e", "type": "pattern"}, {"name": "Emissions per passenger mile or per delivery", "unit": "gCO2e", "type": "pattern"}, {"name": "Battery reuse and recycling rate", "unit": "%", "type": "pattern"}, {"name": "Mode shift from private car", "unit": "%", "type": "pattern"}]
+  }
+}

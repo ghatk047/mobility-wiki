@@ -1,0 +1,23 @@
+{
+  "_meta": {"purpose": "Real role titles per domain. Keeps generated swim lanes and step owners plausible rather than generic.", "researched_on": "2026-09-09"},
+  "roles": {
+    "MD": ["Marketplace Operations Manager", "Dispatch Algorithm Engineer", "Supply Positioning Analyst", "Routing Engineer", "Regional Marketplace Lead", "Data Scientist - Matching"],
+    "PX": ["Pricing Manager", "Revenue Management Analyst", "Incentive Program Manager", "Promotions Marketing Manager", "Pricing Data Scientist"],
+    "SL": ["Driver Operations Manager", "Courier Community Manager", "Onboarding Specialist", "Background Screening Coordinator", "Deactivation Review Analyst", "Worker Classification Counsel", "Rider Account Specialist"],
+    "TS": ["Trust and Safety Manager", "Safety Incident Responder", "Background Check Adjudicator", "Insurance Claims Handler", "Fraud Investigations Analyst", "Special Investigations Unit Lead"],
+    "PF": ["Payments Operations Manager", "Payout Operations Analyst", "Revenue Accountant", "Tax Compliance Manager", "Treasury Analyst", "Payments Risk Analyst"],
+    "CX": ["Support Operations Manager", "Tier 2 Support Specialist", "Escalations Lead", "Accessibility Program Manager", "Voice of Customer Analyst"],
+    "AV": ["Fleet Response Specialist", "Remote Assistance Operator", "AV Depot Technician", "Safety Case Engineer", "Autonomous Specialist", "AV Deployment Manager", "Systems Safety Lead", "Regulatory Affairs Manager - AV"],
+    "MF": ["Fleet Operations Manager", "Juicer / Fleet Charger", "Rebalancing Driver", "Field Mechanic", "IoT Telemetry Engineer", "City Operations Lead", "Warehouse Supervisor", "Parking Compliance Coordinator"],
+    "LM": ["Merchant Operations Manager", "Menu Operations Specialist", "Courier Dispatch Analyst", "Dasher Support Specialist", "Dark Store Manager", "Ghost Kitchen Operations Lead", "Merchant Integration Engineer"],
+    "AM": ["Chief Pilot", "Director of Operations - Part 135", "Certification Program Manager", "Designated Engineering Representative", "Vertiport Operations Manager", "Ground Handling Supervisor", "Flight Test Engineer", "Airspace Integration Specialist", "Maintenance Controller"],
+    "DD": ["Remote Pilot in Command", "Drone Operations Manager", "BVLOS Compliance Manager", "Nest Operations Technician", "Airspace Coordinator", "Visual Observer", "UAS Maintenance Technician", "Part 135 Operations Specialist"],
+    "VA": ["Fleet Asset Manager", "Maintenance Planner", "Procurement Manager - Vehicles", "Asset Accountant", "Warranty Claims Specialist", "Depot Manager"],
+    "RC": ["Regulatory Affairs Director", "Municipal Permitting Manager", "Government Relations Lead", "Data Privacy Officer", "Compliance Analyst", "Policy Counsel"],
+    "TD": ["Mapping Operations Manager", "Geospatial Engineer", "ML Platform Engineer", "Site Reliability Engineer", "Telematics Engineer", "Data Platform Architect"],
+    "GM": ["Growth Marketing Manager", "Performance Marketing Analyst", "Brand Manager", "City Launcher", "Partnerships Manager", "Lifecycle Marketing Manager"],
+    "FN": ["FP&A Manager", "Controller", "Revenue Accountant", "Treasury Manager", "Investor Relations Director", "Unit Economics Analyst"],
+    "HR": ["Talent Acquisition Partner", "People Operations Manager", "Compensation Analyst", "Employee Relations Manager", "Workforce Planning Analyst"],
+    "SE": ["Sustainability Manager", "Carbon Accounting Analyst", "Fleet Electrification Manager", "Battery Circularity Lead", "Urban Policy Analyst"]
+  }
+}
