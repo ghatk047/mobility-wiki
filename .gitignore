@@ -3,3 +3,5 @@ data/*.xlsx
 data/raw/
 .DS_Store
 data/logs/
+__pycache__/
+*.pyc
