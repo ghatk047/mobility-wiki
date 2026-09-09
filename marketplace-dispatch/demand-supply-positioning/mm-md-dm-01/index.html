@@ -775,7 +775,7 @@
           <span class="pid-badge tier-1">MD</span>
           MM-MD-DM-01 &mdash; Short-Horizon Demand Forecasting by H3 Cell and Time Bucket
         </h1>
-        <p>This process applies to the micromobility archetype, focusing on short-horizon demand forecasting by H3 cell and time bucket. It ensures that the supply of scooters and e-bikes is aligned with local demand patterns to optimize rider experience and operational efficiency.</p>
+        <p>This process involves forecasting short-term demand for mobility services across various archetypes including ride-hail, last-mile delivery, micromobility, and autonomous ride-hail by dividing the geographic area into H3 cells and time buckets. The goal is to optimize supply positioning and dispatch decisions based on predicted demand.</p>
         <p class="badge-row"><span class="conf-badge conf-solid">Well sourced</span>
            <span class="tier-badge">Shared Marketplace Core</span></p>
       </div>
@@ -803,10 +803,10 @@
             <tr><th>L1 Domain</th><td>🔀 Marketplace Matching &amp; Dispatch</td></tr>
             <tr><th>L2 Process Group</th><td>Demand Forecasting &amp; Supply Positioning</td></tr>
             <tr><th>L3 Name</th><td>Short-Horizon Demand Forecasting by H3 Cell and Time Bucket</td></tr>
-            <tr><th>Trigger</th><td>Hourly data ingestion from GBFS feeds and real-time location updates from mobile devices.</td></tr>
-            <tr><th>Outcome</th><td>A short-horizon demand forecast for each H3 cell and time bucket, informing supply positioning decisions.</td></tr>
-            <tr><th>Archetype Variation</th><td>This process is crucial for micromobility operators like Bird and Lime, which must manage fleet sizes within regulatory limits while ensuring high availability. It differs from ride-hail marketplaces by focusing on vehicle rebalancing rather than driver matching.</td></tr>
-            <tr><th>Systems</th><td><span class="sys-tag sys-reg">GBFS (General Bikeshare Feed Specification)</span> <span class="sys-tag sys-platform">Uber Michelangelo (Uber (internal))</span> <span class="sys-tag sys-city">Joyride Fleet Management Dashboard (Joyride)</span> <span class="sys-tag sys-city">Ride Report (Ride Report)</span> <span class="sys-tag sys-city">Populus Mobility Manager (Populus AI)</span></td></tr>
+            <tr><th>Trigger</th><td>Scheduled hourly or every 15 minutes during peak hours.</td></tr>
+            <tr><th>Outcome</th><td>Accurate short-term demand forecasts for each H3 cell and time bucket, enabling informed supply positioning and dispatch decisions.</td></tr>
+            <tr><th>Archetype Variation</th><td>Ride-hail matches drivers, micromobility rebalances vehicles, delivery assigns couriers. Autonomous ride-hail relies on AV availability data.</td></tr>
+            <tr><th>Systems</th><td><span class="sys-tag sys-platform">Uber Michelangelo (Uber (internal))</span> <span class="sys-tag sys-other">Hot-index updater / map-matching service (Uber (internal))</span> <span class="sys-tag sys-city">Joyride Fleet Management Dashboard (Joyride)</span> <span class="sys-tag sys-platform">Uber H3 (Uber (open source))</span></td></tr>
           </table>
         </div>
       </div>
@@ -827,146 +827,122 @@
         <tr>
           <td class="step-num">1.1</td>
           <td>Data Ingestion</td>
-          <td>Data Scientist - Matching</td>
-          <td><span class="sys-tag sys-reg">GBFS (General Bikeshare Feed Specification)</span></td>
-          <td>Real-time vehicle availability data from GBFS feeds</td>
-          <td>Normalized and aggregated data by H3 cell and time bucket</td>
-          <td>Match time under 15 seconds</td>
-          <td>Inconsistent or missing data from GBFS feeds</td>
+          <td>Marketplace Operations Manager</td>
+          <td><span class="sys-tag sys-other">Hot-index updater / map-matching service (Uber (internal))</span></td>
+          <td>Location events from riders, drivers, and vehicles</td>
+          <td>H3 cell membership data</td>
+          <td>Real-time prediction throughput (predictions/sec) = 10M/sec at peak across Uber Michelangelo</td>
+          <td>High latency in location event ingestion</td>
           <td>N</td>
           <td><span class="exception-y">Y</span></td>
         </tr>
         <tr>
           <td class="step-num">1.2</td>
-          <td>Demand Pattern Recognition</td>
+          <td>Demand Aggregation</td>
           <td>Data Scientist - Matching</td>
           <td><span class="sys-tag sys-platform">Uber Michelangelo (Uber (internal))</span></td>
-          <td>Normalized and aggregated data by H3 cell and time bucket</td>
-          <td>Identified demand patterns and anomalies</td>
-          <td>Driver acceptance rate above 70 percent</td>
-          <td>High computational load during peak hours</td>
-          <td><span class="decision-y">Y</span></td>
-          <td>N</td>
-        </tr>
-        <tr>
-          <td class="step-num">1.3</td>
-          <td>Supply Positioning Analysis</td>
-          <td>Supply Positioning Analyst</td>
-          <td><span class="sys-tag sys-city">Joyride Fleet Management Dashboard (Joyride)</span></td>
-          <td>Identified demand patterns and anomalies</td>
-          <td>Recommended supply adjustments by H3 cell and time bucket</td>
-          <td>Unfulfilled request rate / cancellation rate below 5 percent</td>
-          <td>Inaccurate demand forecasting leading to over/under-provisioning</td>
-          <td><span class="decision-y">Y</span></td>
-          <td><span class="exception-y">Y</span></td>
-        </tr>
-        <tr>
-          <td class="step-num">1.4</td>
-          <td>Rebalancing Strategy Generation</td>
-          <td>Dispatch Algorithm Engineer</td>
-          <td><span class="sys-tag sys-city">Joyride Fleet Management Dashboard (Joyride)</span></td>
-          <td>Recommended supply adjustments by H3 cell and time bucket</td>
-          <td>Optimized rebalancing strategy for each vehicle type</td>
-          <td>Pickup ETA vs actual within 2 minutes</td>
-          <td>Complexity in managing multiple vehicle types</td>
-          <td>N</td>
-          <td><span class="exception-y">Y</span></td>
-        </tr>
-        <tr>
-          <td class="step-num">1.5</td>
-          <td>Rebalancing Execution</td>
-          <td>Dispatch Algorithm Engineer</td>
-          <td><span class="sys-tag sys-city">Joyride Fleet Management Dashboard (Joyride)</span></td>
-          <td>Optimized rebalancing strategy for each vehicle type</td>
-          <td>Executed rebalancing commands to fleet management systems</td>
-          <td>Utilisation above 75 percent</td>
-          <td>Real-time communication delays with vehicles</td>
-          <td><span class="decision-y">Y</span></td>
-          <td>N</td>
-        </tr>
-        <tr>
-          <td class="step-num">1.6</td>
-          <td>Feedback Loop Establishment</td>
-          <td>Marketplace Operations Manager</td>
-          <td><span class="sys-tag sys-city">Joyride Fleet Management Dashboard (Joyride)</span></td>
-          <td>Executed rebalancing commands to fleet management systems</td>
-          <td>Established feedback loop for performance monitoring and adjustments</td>
-          <td>Real-time prediction throughput above 5M/sec</td>
-          <td>Data latency in feedback loops</td>
-          <td>N</td>
-          <td><span class="exception-y">Y</span></td>
-        </tr>
-        <tr>
-          <td class="step-num">1.7</td>
-          <td>Compliance Monitoring</td>
-          <td>Marketplace Operations Manager</td>
-          <td><span class="sys-tag sys-city">Ride Report (Ride Report)</span></td>
-          <td>Executed rebalancing commands to fleet management systems</td>
-          <td>Monitored compliance with regulatory limits and policies</td>
+          <td>H3 cell membership data</td>
+          <td>Aggregated demand data by H3 cell and time bucket</td>
           <td>Match time under 15 seconds</td>
-          <td>Regulatory changes affecting fleet operations</td>
-          <td><span class="decision-y">Y</span></td>
+          <td>Data skew in high-demand areas</td>
           <td>N</td>
+          <td><span class="exception-y">Y</span></td>
         </tr>
         <tr>
-          <td class="step-num">1.8</td>
-          <td>Policy Communication</td>
-          <td>Marketplace Operations Manager</td>
-          <td><span class="sys-tag sys-city">Populus Mobility Manager (Populus AI)</span></td>
-          <td>Monitored compliance with regulatory limits and policies</td>
-          <td>Communicated policy updates to fleet operators</td>
+          <td class="step-num">2.1</td>
+          <td>Supply Data Collection</td>
+          <td>Dispatch Algorithm Engineer</td>
+          <td><span class="sys-tag sys-city">Joyride Fleet Management Dashboard (Joyride)</span></td>
+          <td>Vehicle state data from IoT sensors</td>
+          <td>Supply availability data by H3 cell and time bucket</td>
           <td>Driver acceptance rate above 70 percent</td>
-          <td>Effective communication of complex policies</td>
-          <td><span class="decision-y">Y</span></td>
+          <td>Inaccurate vehicle location reporting</td>
+          <td>N</td>
           <td><span class="exception-y">Y</span></td>
         </tr>
         <tr>
-          <td class="step-num">1.9</td>
-          <td>Performance Reporting</td>
-          <td>Supply Positioning Analyst</td>
-          <td><span class="sys-tag sys-city">Joyride Fleet Management Dashboard (Joyride)</span></td>
-          <td>Executed rebalancing commands to fleet management systems</td>
-          <td>Generated performance reports for review by senior leadership</td>
+          <td class="step-num">2.2</td>
+          <td>Supply Aggregation</td>
+          <td>Data Scientist - Matching</td>
+          <td><span class="sys-tag sys-platform">Uber Michelangelo (Uber (internal))</span></td>
+          <td>Supply availability data by H3 cell and time bucket</td>
+          <td>Aggregated supply data by H3 cell and time bucket</td>
           <td>Unfulfilled request rate / cancellation rate below 5 percent</td>
-          <td>Data interpretation and reporting delays</td>
+          <td>Supply data inconsistency</td>
           <td>N</td>
           <td><span class="exception-y">Y</span></td>
         </tr>
         <tr>
-          <td class="step-num">1.10</td>
-          <td>Continuous Improvement Planning</td>
+          <td class="step-num">3.1</td>
+          <td>Demand Forecasting Model Training</td>
           <td>Data Scientist - Matching</td>
           <td><span class="sys-tag sys-platform">Uber Michelangelo (Uber (internal))</span></td>
-          <td>Generated performance reports for review by senior leadership</td>
-          <td>Developed continuous improvement plans based on performance data</td>
-          <td>Pickup ETA vs actual within 2 minutes</td>
-          <td>Resource allocation for implementing improvements</td>
+          <td>Historical demand and supply data</td>
+          <td>Trained forecasting model</td>
+          <td>ETA accuracy / absolute ETA error within 1 minute</td>
+          <td>Model overfitting to historical data</td>
           <td><span class="decision-y">Y</span></td>
-          <td>N</td>
-        </tr>
-        <tr>
-          <td class="step-num">1.11</td>
-          <td>System Maintenance</td>
-          <td>Data Scientist - Matching</td>
-          <td><span class="sys-tag sys-platform">Uber Michelangelo (Uber (internal))</span></td>
-          <td>Continuous improvement plans based on performance data</td>
-          <td>Scheduled system maintenance and updates</td>
-          <td>Utilisation above 75 percent</td>
-          <td>System downtime affecting operations</td>
-          <td>N</td>
           <td><span class="exception-y">Y</span></td>
         </tr>
         <tr>
-          <td class="step-num">1.12</td>
-          <td>Risk Assessment</td>
+          <td class="step-num">3.2</td>
+          <td>Demand Forecasting Model Execution</td>
+          <td>Data Scientist - Matching</td>
+          <td><span class="sys-tag sys-platform">Uber Michelangelo (Uber (internal))</span></td>
+          <td>Aggregated demand and supply data by H3 cell and time bucket</td>
+          <td>Short-term demand forecasts</td>
+          <td>Pickup ETA vs actual within 5 minutes</td>
+          <td>Real-time model retraining</td>
+          <td><span class="decision-y">Y</span></td>
+          <td><span class="exception-y">Y</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">4.1</td>
+          <td>Supply Positioning Decision</td>
+          <td>Supply Positioning Analyst</td>
+          <td><span class="sys-tag sys-platform">Uber Michelangelo (Uber (internal))</span></td>
+          <td>Short-term demand forecasts</td>
+          <td>Optimized supply positioning plan</td>
+          <td>Utilisation (paid time / on-app time) above 60 percent</td>
+          <td>Balancing supply across multiple archetypes</td>
+          <td><span class="decision-y">Y</span></td>
+          <td><span class="exception-y">Y</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">4.2</td>
+          <td>Dispatch Decision Execution</td>
+          <td>Dispatch Algorithm Engineer</td>
+          <td><span class="sys-tag sys-platform">Uber Michelangelo (Uber (internal))</span></td>
+          <td>Optimized supply positioning plan</td>
+          <td>Dispatch instructions to drivers, couriers, and vehicles</td>
+          <td>Match time under 15 seconds</td>
+          <td>Dynamic dispatch adjustments</td>
+          <td><span class="decision-y">Y</span></td>
+          <td><span class="exception-y">Y</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">5.1</td>
+          <td>Feedback Loop Collection</td>
           <td>Marketplace Operations Manager</td>
-          <td><span class="sys-tag sys-city">Joyride Fleet Management Dashboard (Joyride)</span></td>
-          <td>Continuous improvement plans based on performance data</td>
-          <td>Conducted risk assessments and mitigation strategies</td>
-          <td>Real-time prediction throughput above 5M/sec</td>
-          <td>Identifying new operational risks</td>
+          <td><span class="sys-tag sys-platform">Uber Michelangelo (Uber (internal))</span></td>
+          <td>Dispatch performance data</td>
+          <td>Performance feedback loop</td>
+          <td>Unfulfilled request rate / cancellation rate below 5 percent</td>
+          <td>Delayed feedback collection</td>
           <td><span class="decision-y">Y</span></td>
-          <td>N</td>
+          <td><span class="exception-y">Y</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">5.2</td>
+          <td>Model Retraining and Optimization</td>
+          <td>Data Scientist - Matching</td>
+          <td><span class="sys-tag sys-platform">Uber Michelangelo (Uber (internal))</span></td>
+          <td>Performance feedback loop</td>
+          <td>Optimized forecasting model</td>
+          <td>Driver acceptance rate above 70 percent</td>
+          <td>Model drift over time</td>
+          <td><span class="decision-y">Y</span></td>
+          <td><span class="exception-y">Y</span></td>
         </tr>
               </tbody>
             </table>
@@ -978,10 +954,10 @@
         <div class="card-header">&#x1F4CA; KPIs &amp; Risk Register</div>
         <div class="card-body">
           <p class="mb-8"><strong>KPIs</strong></p>
-          <div class="kpi-list mb-8"><span class="kpi-pill">Match time under 15 seconds</span> <span class="kpi-pill">Driver acceptance rate above 70 percent</span> <span class="kpi-pill">Unfulfilled request rate / cancellation rate below 5 percent</span> <span class="kpi-pill">Pickup ETA vs actual within 2 minutes</span> <span class="kpi-pill">Utilisation above 75 percent</span> <span class="kpi-pill">Real-time prediction throughput above 5M/sec</span></div>
+          <div class="kpi-list mb-8"><span class="kpi-pill">Match time under 15 seconds</span> <span class="kpi-pill">Driver acceptance rate above 70 percent</span> <span class="kpi-pill">Unfulfilled request rate / cancellation rate below 5 percent</span> <span class="kpi-pill">ETA accuracy / absolute ETA error within 1 minute</span> <span class="kpi-pill">Pickup ETA vs actual within 5 minutes</span></div>
           <p class="mb-8 mt-16"><strong>Key Risks</strong></p>
-          <div class="kpi-list"><span class="risk-pill">Regulatory changes affecting fleet operations</span> <span class="risk-pill">Data latency in feedback loops</span> <span class="risk-pill">Effective communication of complex policies</span> <span class="risk-pill">Resource allocation for implementing improvements</span> <span class="risk-pill">System downtime affecting operations</span></div>
-          <p class="mb-8 mt-16"><strong>Swim Lanes</strong></p><div class="kpi-list"><span class="lane-pill">Data Scientist - Matching &middot; 1.1, 1.2, 1.10, 1.11</span> <span class="lane-pill">Supply Positioning Analyst &middot; 1.3, 1.9</span> <span class="lane-pill">Dispatch Algorithm Engineer &middot; 1.4, 1.5</span> <span class="lane-pill">Marketplace Operations Manager &middot; 1.6, 1.7, 1.8, 1.12</span></div>
+          <div class="kpi-list"><span class="risk-pill">Inaccurate demand forecasting leading to supply shortages or surpluses.</span> <span class="risk-pill">Regulatory changes affecting micromobility and AV operations.</span> <span class="risk-pill">Safety incidents due to dispatch errors in high-demand areas.</span> <span class="risk-pill">Operational challenges in integrating diverse supply sources across archetypes.</span></div>
+          <p class="mb-8 mt-16"><strong>Swim Lanes</strong></p><div class="kpi-list"><span class="lane-pill">Marketplace Operations Manager &middot; 1.1, 5.1</span> <span class="lane-pill">Data Scientist - Matching &middot; 1.2, 3.1, 3.2, 5.2</span> <span class="lane-pill">Dispatch Algorithm Engineer &middot; 2.1, 2.2, 4.1, 4.2</span> <span class="lane-pill">Supply Positioning Analyst &middot; 4.1</span></div>
         </div>
       </div>
 
