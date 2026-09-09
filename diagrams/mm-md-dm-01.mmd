@@ -1,0 +1,65 @@
+%%{init: {'theme':'base','fontFamily':'Helvetica Neue, Helvetica, Arial, sans-serif','themeVariables':{'fontSize':'13px'}}}%%
+flowchart LR
+  subgraph P1[Phase 1: Data Ingestion]
+    Start([Start]) --> NodeA[Data Ingestion\\nGBFS General Bikeshare Feed Specification]
+    NodeA --> DecisionA{Ingestion successful?}
+    DecisionA -- Yes --> NodeB[Demand Pattern Recognition\\nUber Michelangelo Uber internal]
+    DecisionA -- No --> Exception1([Exception])
+  end
+
+  subgraph P2[Phase 2: Demand Analysis]
+    NodeB --> DecisionB{Pattern recognized?}
+    DecisionB -- Yes --> NodeC[Supply Positioning Analysis\\nJoyride Fleet Management Dashboard Joyride]
+    DecisionB -- No --> Exception2([Exception])
+  end
+
+  subgraph P3[Phase 3: Supply and Rebalancing]
+    NodeC --> DecisionC{Supply positions analyzed?}
+    DecisionC -- Yes --> NodeD[Rebalancing Strategy Generation\\nJoyride Fleet Management Dashboard Joyride]
+    DecisionC -- No --> Exception3([Exception])
+    NodeD --> DecisionD{Strategy generated?}
+    DecisionD -- Yes --> NodeE[Rebalancing Execution\\nJoyride Fleet Management Dashboard Joyride]
+    DecisionD -- No --> Exception4([Exception])
+  end
+
+  subgraph P4[Phase 4: Feedback and Compliance]
+    NodeE --> DecisionE{Rebalancing executed?}
+    DecisionE -- Yes --> NodeF[Feedback Loop Establishment\\nJoyride Fleet Management Dashboard Joyride]
+    DecisionE -- No --> Exception5([Exception])
+    NodeF --> NodeG[Compliance Monitoring\\nRide Report Ride Report]
+  end
+
+  subgraph P5[Phase 5: Policy and Reporting]
+    NodeG --> DecisionG{Compliance monitored?}
+    DecisionG -- Yes --> NodeH[Policy Communication\\nPopulus Mobility Manager Populus AI]
+    DecisionG -- No --> Exception6([Exception])
+    NodeH --> NodeI[Performance Reporting\\nJoyride Fleet Management Dashboard Joyride]
+  end
+
+  subgraph P6[Phase 6: Continuous Improvement]
+    NodeI --> DecisionI{Policy communicated?}
+    DecisionI -- Yes --> NodeJ[Continuous Improvement Planning\\nUber Michelangelo Uber internal]
+    DecisionI -- No --> Exception7([Exception])
+    NodeJ --> NodeK[System Maintenance\\nUber Michelangelo Uber internal]
+    NodeK --> DecisionK{Maintenance complete?}
+    DecisionK -- Yes --> NodeL[Risk Assessment\\nJoyride Fleet Management Dashboard Joyride]
+    DecisionK -- No --> Exception8([Exception])
+  end
+
+  style Start fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style Exception1 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style Exception2 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style Exception3 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style Exception4 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style Exception5 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style Exception6 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style Exception7 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style Exception8 fill:#0f2a5c,color:#fff,stroke:#0f2a5c
+  style DecisionA fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecisionB fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecisionC fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecisionD fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecisionE fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecisionG fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecisionI fill:#10b3c6,color:#fff,stroke:#10b3c6
+  style DecisionK fill:#10b3c6,color:#fff,stroke:#10b3c6

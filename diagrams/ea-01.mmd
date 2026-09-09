@@ -1,0 +1,113 @@
+%%{init: {'theme':'base','fontFamily':'Helvetica Neue, Helvetica, Arial, sans-serif','themeVariables':{'fontSize':'13px'}}}%%
+flowchart TB
+
+  subgraph EXT["🌐 External Feeds"]
+    direction LR
+    FAA["FAA SWIM\nNOTAMs - TFRs - Slots"]
+    WX["Jeppesen WSI\nWeather - Winds - SIGMETs"]
+    OSM["OpenStreetMap\nBase map data"]
+    GMP["Google Maps Platform\nGeocoding - routing - traffic feeds"]
+  end
+
+  subgraph MATCHING["📋 Matching and Dispatch"]
+    direction TB
+    UberMichelangelo["Uber Michelangelo\nML platform - ~400 active ML projects"]
+    UberDeepETA["Uber DeepETA\nETA residual model - 100M+ parameters"]
+    UberH3["Uber H3\nHexagonal hierarchical geospatial index"]
+    HotIndexUpdater["Hot-index updater / map-matching service\nConsumes location events, map-snaps points, converts to H3 cell"]
+    MichelangeloOnlinePredictionService["Michelangelo Online Prediction Service\nLow-latency model serving used by ETA, matching, fraud and Eats ranking"]
+  end
+
+  subgraph PRICING["💰 Pricing"]
+    direction TB
+    UberPricingEngine["Uber Pricing Engine\nDynamic pricing - surge pricing - demand-based pricing"]
+    LyftPricingModel["Lyft Pricing Model\nRevenue-driven pricing - fare optimization"]
+  end
+
+  subgraph PAYMENTS["💳 Payments"]
+    direction TB
+    StripeConnect["Stripe Connect\nMarketplace payments and split payouts"]
+    Braintree["Braintree\nCard processing and stored payment credentials"]
+    Twilio["Twilio\nMasked-number voice/SMS between rider and driver"]
+  end
+
+  subgraph TRUSTSAFETY["🔒 Trust and Safety"]
+    direction TB
+    Checkr["Checkr\nBackground check API - MVR and criminal screening for gig platforms"]
+    RideReport["Ride Report\nCity micromobility permit compliance, fleet-cap monitoring and reporting"]
+    Lacuna["Lacuna\nDigital right-of-way and curb policy enforcement"]
+  end
+
+  subgraph AVSTRATEGY["🚗 Autonomous Vehicle Strategy"]
+    direction TB
+    WaymoAVStrategy["Waymo LLC\nAutonomous vehicle strategy - ~30 AV partners"]
+    UberAVPartnership["Uber Technologies, Inc.\nPartnership-led AV strategy - targeting robotaxi availability in 15 cities by end of 2026"]
+    LyftAVStrategy["Lyft, Inc.\nStated willingness to purchase thousands of AVs outright; adding Waymo vehicles to the Lyft app"]
+    DoorDashAutonomy["DoorDash, Inc.\nLaunched Dot - autonomous delivery robot; partners with Serve Robotics for sidewalk delivery; launched DoorDash Air"]
+  end
+
+  subgraph MDSAPI["🌐 Mobility Data Specification API"]
+    direction TB
+    MDS20["Mobility Data Specification 2.0\nProvider API - Agency API - Policy API"]
+    GBFS["GBFS General Bikeshare Feed Specification\nPublic real-time vehicle availability feed"]
+    PopulusMobilityManager["Populus Mobility Manager\nCity-side ingestion of real-time and historic MDS data"]
+  end
+
+  subgraph DELIVERYPLATFORM["🚚 Delivery Platform"]
+    direction TB
+    DoorDashAutonomousDeliveryPlatform["DoorDash Autonomous Delivery Platform\nOrchestration layer routing orders across couriers, robots and drones"]
+    ServeRobotics["Serve Robotics\nThird-party sidewalk delivery robots integrated into the DoorDash marketplace"]
+    DoorDashDot["DoorDash Dot\nAutonomous delivery robot - up to 20 mph, operates in bike lanes, roads and sidewalks"]
+    DoorDashAir["DoorDash Air\nIn-house drone delivery operation under its own FAA Part 135 air carrier certificate"]
+  end
+
+  subgraph MICROMOBILITY["🚴‍♂️ Micromobility"]
+    direction TB
+    BoltTechnology["Bolt Technology OÜ\nLargest European scooter operator by city count - AI-equipped e-scooters for compliant-riding enforcement"]
+    LimeNeutronHoldings["Lime Neutron Holdings, Inc.\nNewly public, operationally profitable, but carrying a disclosed going-concern warning"]
+    BirdThirdLaneMobility["Bird brand of Third Lane Mobility, Inc.\nRestructured post-bankruptcy; operates as a brand under a new parent"]
+  end
+
+  FAA -->|"NOTAMs - flow programs"| UberDeepETA
+  WX -->|"meteorological data"| HotIndexUpdater
+  OSM -->|"base map data"| UberH3
+  GMP -->|"geocoding - routing - traffic feeds"| UberMichelangelo
+
+  UberMichelangelo -->|"10M/sec at peak predictions"| MichelangeloOnlinePredictionService
+  UberDeepETA -->|"post-processes routing-engine estimates"| HotIndexUpdater
+  UberH3 -->|"driver-state sharding and supply/demand aggregation"| HotIndexUpdater
+  HotIndexUpdater -->|"writes DriverState and cell membership"| UberMichelangelo
+
+  StripeConnect -->|"payment transactions"| Braintree
+  Braintree -->|"card processing"| Twilio
+  Twilio -->|"masked-number voice/SMS"| Checkr
+
+  MDS20 -->|"real-time vehicle availability feed"| GBFS
+  PopulusMobilityManager -->|"city-side ingestion of real-time and historic MDS data"| RideReport
+  RideReport -->|"digital policy communication to operators for compliance"| Lacuna
+
+  DoorDashAutonomousDeliveryPlatform -->|"orchestration layer routing orders"| ServeRobotics
+  ServeRobotics -->|"third-party sidewalk delivery robots"| DoorDashDot
+  DoorDashDot -->|"autonomous delivery robot"| DoorDashAir
+
+  BoltTechnology -->|"vertically-integrated vehicle design"| LimeNeutronHoldings
+  LimeNeutronHoldings -->|"newly public, operationally profitable"| BirdThirdLaneMobility
+
+  classDef ext fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+  classDef match fill:#fff7ed,stroke:#ea580c,color:#7c2d12
+  classDef price fill:#ecfeff,stroke:#0891b2,color:#164e63
+  classDef trust fill:#fde68a,stroke:#fbbf24,color:#78350f
+  classDef avstrat fill:#fce7f3,stroke:#c026d3,color:#7c3aed
+  classDef mdsapi fill:#e9d5ff,stroke:#8b5cf6,color:#60a5fa
+  classDef delivery fill:#fee2e2,stroke:#ef4444,color:#dc2626
+  classDef micromobility fill:#f3e8eb,stroke:#ec4899,color:#db2777
+  classDef sparse fill:#f8fafc,stroke:#94a3b8,color:#64748b,stroke-dasharray: 6 4
+
+  class FAA,WX,OSM,GMP ext
+  class UberMichelangelo,UberDeepETA,UberH3,HotIndexUpdater,MichelangeloOnlinePredictionService match
+  class StripeConnect,Braintree,Twilio pay
+  class Checkr,RideReport,Lacuna trust
+  class WaymoAVStrategy,UberAVPartnership,LyftAVStrategy,DoorDashAutonomy avstrat
+  class MDS20,GBFS,PopulusMobilityManager mdsapi
+  class DoorDashAutonomousDeliveryPlatform,ServeRobotics,DoorDashDot,DoorDashAir delivery
+  class BoltTechnology,LimeNeutronHoldings,BirdThirdLaneMobility micromobility

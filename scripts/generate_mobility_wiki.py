@@ -91,8 +91,11 @@ EXCEL_PATH  = DATA_DIR / "Mobility_Process_Wiki.xlsx"   # local only, never push
 # A system-resident sans stack. An SVG loaded through <img> cannot fetch a
 # webfont, so anything exotic silently falls back to serif and looks soft.
 FONT_STACK = "Helvetica Neue, Helvetica, Arial, sans-serif"
-INIT_LINE = ("%%{init: {'theme':'base','themeVariables':"
-             "{'fontSize':'13px','fontFamily':'" + FONT_STACK + "'}}}%%")
+# fontFamily MUST be at the top level of the init config. Mermaid v11 silently
+# ignores it inside themeVariables and falls back to "trebuchet ms" — verified by
+# rendering both forms through mmdc 11.12.0.
+INIT_LINE = ("%%{init: {'theme':'base','fontFamily':'" + FONT_STACK + "',"
+             "'themeVariables':{'fontSize':'13px'}}}%%")
 
 PID_W, PID_H = 2400, 1400
 EA_W,  EA_H  = 3840, 2160
@@ -283,9 +286,14 @@ def validate_process(proc, data):
             unknown_sys.add(s)
 
     blob = json.dumps(data).lower()
-    cited = re.findall(r'\b(?:14\s*)?(?:cfr|part|prop(?:osition)?|ab|d\.)\s*[\w.\-]+', blob)
+    # \b after each keyword: without it the "ab" alternative matched "above",
+    # "part" matched "partial", and every page reported phantom citations.
+    cited = re.findall(
+        r'\b(?:14\s+cfr|cfr|part|prop\b|proposition|ab|astm|cpuc)\b[\s.]*'
+        r'(?:no\.?\s*)?(\d[\w.\-]*)', blob)
+    cited = [c for c in cited if any(ch.isdigit() for ch in c)]
     unknown_regs = {c for c in set(cited)
-                    if not any(c in k or k in c for k in known_regs)}
+                    if not any(c in k for k in known_regs)}
 
     if unknown_sys:
         log(f"  VALIDATION {proc['pid']}: {len(unknown_sys)} unsourced system(s): "
@@ -841,9 +849,11 @@ def finalize_svg(path):
     svg = re.sub(r'max-width:\s*[^;"}]+;?\s*', '', svg)           # any non-px form
     if 'height=' not in svg.split('>', 1)[0]:
         svg = svg.replace('<svg ', f'<svg height="{h}" ', 1)
-    # Belt and braces on the font: the init block sets it, this guarantees it.
-    svg = svg.replace('font-family:trebuchet ms,verdana,arial,sans-serif',
-                      f'font-family:{FONT_STACK}')
+    # Belt and braces on the font. The init block sets it, but mermaid also emits
+    # a --mermaid-font-family custom property and may quote the family name, so
+    # every remaining default declaration is rewritten here regardless of form.
+    svg = re.sub(r'"?trebuchet ms"?\s*,\s*verdana\s*,\s*arial\s*,\s*sans-serif',
+                 FONT_STACK, svg, flags=re.IGNORECASE)
     path.write_text(svg, encoding="utf-8")
     residual = svg.count("max-width")
     log(f"  svg finalised — intrinsic {w}x{h}, max-width occurrences remaining: {residual}")
